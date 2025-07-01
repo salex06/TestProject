@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: messenger
+  datasource:
+    platform: postgres
+    url: jdbc:postgresql://localhost:${DB_HOST_PORT}/${DB_NAME}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    driverClassName: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+  liquibase:
+    enabled: false
+    change-log: classpath:migrations/master.xml
+
+server:
+  port: 8080
+
+jwt:
+  lifetime: 10m
+  secret: ${JWT_SECRET}
