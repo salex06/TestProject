@@ -1,8 +1,9 @@
 package salex.messenger.api;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,13 +13,23 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import salex.messenger.dto.account.UserInfo;
+import salex.messenger.dto.account.update.about.UpdateAboutRequest;
+import salex.messenger.dto.account.update.about.UpdateAboutResponse;
+import salex.messenger.dto.account.update.name.UpdateNameRequest;
+import salex.messenger.dto.account.update.name.UpdateNameResponse;
+import salex.messenger.dto.account.update.photo.UpdatePhotoRequest;
+import salex.messenger.dto.account.update.photo.UpdatePhotoResponse;
+import salex.messenger.dto.account.update.surname.UpdateSurnameRequest;
+import salex.messenger.dto.account.update.surname.UpdateSurnameResponse;
 import salex.messenger.dto.error.ApiErrorResponse;
 import salex.messenger.entity.User;
+import salex.messenger.exception.UserNotFoundException;
 import salex.messenger.service.UserService;
 
 @AutoConfigureMockMvc
@@ -80,5 +91,223 @@ class AccountRestControllerTest {
                 .andExpect(cookie().path("jwt", "/"))
                 .andExpect(cookie().secure("jwt", true))
                 .andExpect(cookie().value("jwt", expectedValue));
+    }
+
+    @Test
+    @DisplayName("Неудачное обновление имени - пользователь не авторизован")
+    public void updateName_WhenUnauthorized_ThenReturn401() throws Exception {
+        UpdateNameRequest request = new UpdateNameRequest("newName");
+        mockMvc.perform(patch("/api/account/name")
+                        .contentType("application/json")
+                        .content(new ObjectMapper().writeValueAsString(request)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().string(""));
+    }
+
+    @Test
+    @DisplayName("Неудачное обновление имени - пользователь не найден")
+    @WithMockUser("unknown")
+    public void updateName_WhenUserNotFound_ThenReturn404() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        String principalName = "unknown";
+        UpdateNameRequest request = new UpdateNameRequest("newName");
+        when(userService.updateName(principalName, request)).thenAnswer(i -> {
+            throw new UserNotFoundException("Пользователь '" + principalName + "' не найден");
+        });
+        ApiErrorResponse expectedResponse = new ApiErrorResponse(
+                "Пользователь не найден (или удален)!",
+                "404",
+                "UserNotFoundException",
+                "Пользователь '" + principalName + "' не найден");
+
+        mockMvc.perform(patch("/api/account/name")
+                        .contentType("application/json")
+                        .content(mapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound())
+                .andExpect(content().json(mapper.writeValueAsString(expectedResponse)));
+    }
+
+    @Test
+    @DisplayName("Удачное обновление имени")
+    @WithMockUser("unknown")
+    public void updateName_WhenCorrectRequest_ThenUpdateNameAndReturn200() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        String principalName = "unknown";
+        UpdateNameRequest request = new UpdateNameRequest("newName");
+        User user = new User();
+        user.setName(request.newName());
+        when(userService.updateName(principalName, request)).thenReturn(user);
+        UpdateNameResponse expectedResponse = new UpdateNameResponse(user.getName());
+
+        mockMvc.perform(patch("/api/account/name")
+                        .contentType("application/json")
+                        .content(mapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(content().json(mapper.writeValueAsString(expectedResponse)));
+    }
+
+    @Test
+    @DisplayName("Неудачное обновление фамилии - пользователь не авторизован")
+    public void updateSurname_WhenUnauthorized_ThenReturn401() throws Exception {
+        UpdateSurnameRequest request = new UpdateSurnameRequest("newSurname");
+        mockMvc.perform(patch("/api/account/surname")
+                        .contentType("application/json")
+                        .content(new ObjectMapper().writeValueAsString(request)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().string(""));
+    }
+
+    @Test
+    @DisplayName("Неудачное обновление фамилии - пользователь не найден")
+    @WithMockUser("unknown")
+    public void updateSurname_WhenUserNotFound_ThenReturn404() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        String principalName = "unknown";
+        UpdateSurnameRequest request = new UpdateSurnameRequest("newSurname");
+        when(userService.updateSurname(principalName, request)).thenAnswer(i -> {
+            throw new UserNotFoundException("Пользователь '" + principalName + "' не найден");
+        });
+        ApiErrorResponse expectedResponse = new ApiErrorResponse(
+                "Пользователь не найден (или удален)!",
+                "404",
+                "UserNotFoundException",
+                "Пользователь '" + principalName + "' не найден");
+
+        mockMvc.perform(patch("/api/account/surname")
+                        .contentType("application/json")
+                        .content(mapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound())
+                .andExpect(content().json(mapper.writeValueAsString(expectedResponse)));
+    }
+
+    @Test
+    @DisplayName("Удачное обновление фамилии")
+    @WithMockUser("unknown")
+    public void updateSurname_WhenCorrectRequest_ThenUpdateSurnameAndReturn200() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        String principalName = "unknown";
+        UpdateSurnameRequest request = new UpdateSurnameRequest("newName");
+        User user = new User();
+        user.setSurname(request.newSurname());
+        when(userService.updateSurname(principalName, request)).thenReturn(user);
+        UpdateSurnameResponse expectedResponse = new UpdateSurnameResponse(user.getSurname());
+
+        mockMvc.perform(patch("/api/account/surname")
+                        .contentType("application/json")
+                        .content(mapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(content().json(mapper.writeValueAsString(expectedResponse)));
+    }
+
+    @Test
+    @DisplayName("Неудачное обновление 'о себе' - пользователь не авторизован")
+    public void updateAbout_WhenUnauthorized_ThenReturn401() throws Exception {
+        UpdateAboutRequest request = new UpdateAboutRequest("newAbout");
+        mockMvc.perform(patch("/api/account/about")
+                        .contentType("application/json")
+                        .content(new ObjectMapper().writeValueAsString(request)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().string(""));
+    }
+
+    @Test
+    @DisplayName("Неудачное обновление информации 'о себе' - пользователь не найден")
+    @WithMockUser("unknown")
+    public void updateAbout_WhenUserNotFound_ThenReturn404() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        String principalName = "unknown";
+        UpdateAboutRequest request = new UpdateAboutRequest("newAbout");
+        when(userService.updateAbout(principalName, request)).thenAnswer(i -> {
+            throw new UserNotFoundException("Пользователь '" + principalName + "' не найден");
+        });
+        ApiErrorResponse expectedResponse = new ApiErrorResponse(
+                "Пользователь не найден (или удален)!",
+                "404",
+                "UserNotFoundException",
+                "Пользователь '" + principalName + "' не найден");
+
+        mockMvc.perform(patch("/api/account/about")
+                        .contentType("application/json")
+                        .content(mapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound())
+                .andExpect(content().json(mapper.writeValueAsString(expectedResponse)));
+    }
+
+    @Test
+    @DisplayName("Удачное обновление информации 'о себе'")
+    @WithMockUser("unknown")
+    public void updateAbout_WhenCorrectRequest_ThenUpdateSurnameAndReturn200() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        String principalName = "unknown";
+        UpdateAboutRequest request = new UpdateAboutRequest("newAbout");
+        User user = new User();
+        user.setAbout(request.newAbout());
+        when(userService.updateAbout(principalName, request)).thenReturn(user);
+        UpdateAboutResponse expectedResponse = new UpdateAboutResponse(user.getAbout());
+
+        mockMvc.perform(patch("/api/account/about")
+                        .contentType("application/json")
+                        .content(mapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(content().json(mapper.writeValueAsString(expectedResponse)));
+    }
+
+    @Test
+    @DisplayName("Неудачное обновление фото - пользователь не авторизован")
+    public void updatePhoto_WhenUnauthorized_ThenReturn401() throws Exception {
+        MockMultipartFile file =
+                new MockMultipartFile("avatar", "test-avatar.jpg", "image/jpeg", "test image content".getBytes());
+        UpdatePhotoRequest request = new UpdatePhotoRequest(file);
+        mockMvc.perform(multipart("/api/account/photo").file(file).with(req -> {
+                    req.setMethod("PATCH");
+                    return req;
+                }))
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().string(""));
+    }
+
+    @Test
+    @DisplayName("Неудачное обновление фото - пользователь не найден")
+    @WithMockUser("unknown")
+    public void updatePhoto_WhenUserNotFound_ThenReturn404() throws Exception {
+        MockMultipartFile file =
+                new MockMultipartFile("avatar", "test-avatar.jpg", "image/jpeg", "test image content".getBytes());
+        String principalName = "unknown";
+        when(userService.replacePhoto(eq(principalName), any())).thenAnswer(i -> {
+            throw new UserNotFoundException("Пользователь '" + principalName + "' не найден");
+        });
+        ApiErrorResponse expectedResponse = new ApiErrorResponse(
+                "Пользователь не найден (или удален)!",
+                "404",
+                "UserNotFoundException",
+                "Пользователь '" + principalName + "' не найден");
+
+        mockMvc.perform(multipart("/api/account/photo").file(file).with(req -> {
+                    req.setMethod("PATCH");
+                    return req;
+                }))
+                .andExpect(status().isNotFound())
+                .andExpect(content().json(new ObjectMapper().writeValueAsString(expectedResponse)));
+    }
+
+    @Test
+    @DisplayName("Удачное обновление фото")
+    @WithMockUser("unknown")
+    public void updatePhoto_WhenCorrectRequest_ThenReplacePhotoAndReturn200() throws Exception {
+        MockMultipartFile file =
+                new MockMultipartFile("avatar", "test-avatar.jpg", "image/jpeg", "test image content".getBytes());
+        String principalName = "unknown";
+        UpdatePhotoRequest request = new UpdatePhotoRequest(file);
+        User user = new User();
+        user.setPhotoPath(file.getOriginalFilename());
+        when(userService.replacePhoto(eq(principalName), any())).thenReturn(user);
+        UpdatePhotoResponse response = new UpdatePhotoResponse(user.getPhotoPath());
+
+        mockMvc.perform(multipart("/api/account/photo").file(file).with(req -> {
+                    req.setMethod("PATCH");
+                    return req;
+                }))
+                .andExpect(status().isOk())
+                .andExpect(content().json(new ObjectMapper().writeValueAsString(response)));
     }
 }

@@ -20,9 +20,4 @@ public class MainController {
     public String account() {
         return "account";
     }
-
-    @GetMapping("/oops")
-    public String oops() {
-        return "forbidden";
-    }
 }

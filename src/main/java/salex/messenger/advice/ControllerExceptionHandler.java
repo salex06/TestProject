@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import salex.messenger.dto.error.ApiErrorResponse;
+import salex.messenger.exception.StorageException;
 import salex.messenger.exception.UserNotFoundException;
 import salex.messenger.exception.UsernameAlreadyExistsException;
 
@@ -42,6 +43,11 @@ public class ControllerExceptionHandler {
             return handleIncorrectRequest("Страница не найдена", ex, HttpStatus.NOT_FOUND);
         }
         return "error/404";
+    }
+
+    @ExceptionHandler(StorageException.class)
+    public ResponseEntity<?> handleStorageException(@NotNull StorageException ex) {
+        return handleIncorrectRequest(ex.getMessage(), ex, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     private ResponseEntity<ApiErrorResponse> handleIncorrectRequest(

@@ -4,6 +4,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import salex.messenger.dto.account.remove.RemoveUserRequest;
 import salex.messenger.dto.account.update.about.UpdateAboutRequest;
 import salex.messenger.dto.account.update.name.UpdateNameRequest;
 import salex.messenger.dto.account.update.photo.UpdatePhotoRequest;
@@ -54,12 +55,11 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    // TODO: заменить DTO signUpRequest на RemoveUserRequest
-    public void removeUser(SignUpRequest signUpRequest) {
+    public void removeUser(RemoveUserRequest removeUserRequest) {
         User user = userRepository
-                .findByUsername(signUpRequest.username())
-                .orElseThrow(
-                        () -> new UserNotFoundException("Пользователь '" + signUpRequest.username() + "' не найден"));
+                .findByUsername(removeUserRequest.username())
+                .orElseThrow(() ->
+                        new UserNotFoundException("Пользователь '" + removeUserRequest.username() + "' не найден"));
 
         userRepository.deleteById(user.getId());
     }
