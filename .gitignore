@@ -34,3 +34,7 @@ build/
 
 ### .env ####
 .env
+
+### images ###
+/src/main/resources/static/images/**
+!/src/main/resources/static/images/no_img.jpg

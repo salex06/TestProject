@@ -2,24 +2,22 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
     const usernameError = document.getElementById('usernameError');
-    const passwordError = document.getElementById('passwordError');
 
-    // Сброс ошибок
+    const password = document.getElementById('password').value;
+    const name = document.getElementById('name').value;
+    const surname = document.getElementById('surname').value;
+    const photo = document.getElementById('photo');
+    const about = document.getElementById('about').value;
+
     usernameError.textContent = '';
-    passwordError.textContent = '';
 
     try {
+        const formData = new FormData(e.target);
+
         const response = await fetch('/api/auth/signup', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                username,
-                password
-            }),
+            body: formData
         });
 
         if (!response.ok) {

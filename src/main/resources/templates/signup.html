@@ -8,7 +8,7 @@
 </head>
 <body>
 <div class="container">
-    <form id="signupForm" class="auth-form">
+    <form id="signupForm" class="auth-form" enctype="multipart/form-data">
         <h1>Регистрация</h1>
 
         <div class="form-group">
@@ -38,6 +38,48 @@
                     title="Минимум 8 символов, 1 заглавная буква и 1 цифра"
             >
             <span class="error" id="passwordError"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="name">Ваше имя</label>
+            <input
+                    type="text"
+                    id="name"
+                    name="name"
+            >
+            <span class="error" id="nameError"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="surname">Ваша фамилия</label>
+            <input
+                    type="text"
+                    id="surname"
+                    name="surname"
+            >
+            <span class="error" id="surnameError"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="photo">Фото</label>
+            <input
+                    type="file"
+                    id="photo"
+                    name="photo"
+                    accept="image/*"
+            >
+            <span class="error" id="photoError"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="about">Расскажите о себе</label>
+            <textarea
+                    type="text"
+                    id="about"
+                    name="about"
+                    rows="5"
+            ></textarea>
+            <span class="error" id="aboutError"></span>
         </div>
 
         <button type="submit" class="btn">Зарегистрироваться</button>

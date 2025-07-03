@@ -4,11 +4,9 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import salex.messenger.config.JwtConfig;
 import salex.messenger.dto.signin.SignInRequest;
 import salex.messenger.dto.signup.SignUpRequest;
@@ -25,8 +23,8 @@ public class AuthRestController {
     private final UserService userService;
     private final AuthService authService;
 
-    @PostMapping("/signup")
-    public ResponseEntity<?> signUp(@RequestBody SignUpRequest signUpRequest) {
+    @PostMapping(value = "/signup", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> signUp(@ModelAttribute SignUpRequest signUpRequest) {
         User user = userService.saveUser(signUpRequest);
 
         return new ResponseEntity<>(

@@ -21,6 +21,10 @@ spring:
 server:
   port: 8080
 
+storage:
+  location: ./src/main/resources/static/images/
+  max-file-size: 5MB
+
 jwt:
   lifetime: 10m
   secret: ${JWT_SECRET}

@@ -1,7 +1,9 @@
 package salex.messenger.service;
 
 import java.util.Optional;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import salex.messenger.dto.signup.SignUpRequest;
@@ -15,6 +17,7 @@ import salex.messenger.repository.UserRepository;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ImageStorageService imageStorageService;
 
     public Optional<User> findUser(Long userId) {
         return userRepository.findById(userId);
@@ -30,9 +33,22 @@ public class UserService {
                     "Пользователь с именем '" + signUpRequest.username() + "' уже существует");
         }
 
-        User user = new User();
-        user.setUsername(signUpRequest.username());
-        user.setEncryptedPassword(passwordEncoder.encode(signUpRequest.password()));
+        imageStorageService.validateImageFile(signUpRequest.photo());
+        String filename = imageStorageService.store(
+                signUpRequest.photo(),
+                signUpRequest.username()
+                        + "-"
+                        + UUID.randomUUID()
+                        + '.' + FilenameUtils.getExtension(signUpRequest.photo().getOriginalFilename()));
+
+        User user = new User(
+                null,
+                signUpRequest.username(),
+                passwordEncoder.encode(signUpRequest.password()),
+                signUpRequest.name(),
+                signUpRequest.surname(),
+                signUpRequest.about(),
+                filename);
         return userRepository.save(user);
     }
 

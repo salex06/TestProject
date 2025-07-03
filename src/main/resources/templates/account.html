@@ -5,12 +5,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Личный кабинет</title>
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 <div class="container">
     <main class="account-card">
+        <!-- Аватар пользователя -->
+        <div class="avatar-section">
+            <label for="avatar-upload" class="avatar-edit">
+                <img id="avatar-preview" src="/images/no_img.jpg" alt="Аватар">
+                <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
+                <div class="edit-icon"><i class="fas fa-camera"></i></div>
+            </label>
+        </div>
+
         <h1>Привет, <span id="account-username"></span>!</h1>
-        <p>Добро пожаловать в ваш личный кабинет</p>
+
+        <!-- Информация профиля -->
+        <div class="profile-info">
+            <div class="info-item">
+                <label>Имя:</label>
+                <div class="info-value">
+                    <span id="first-name"></span>
+                    <button class="edit-btn" data-field="first-name"><i class="fas fa-pencil-alt"></i></button>
+                </div>
+            </div>
+
+            <div class="info-item">
+                <label>Фамилия:</label>
+                <div class="info-value">
+                    <span id="last-name"></span>
+                    <button class="edit-btn" data-field="last-name"><i class="fas fa-pencil-alt"></i></button>
+                </div>
+            </div>
+
+            <div class="info-item">
+                <label>О себе:</label>
+                <div class="info-value">
+                    <span id="bio"></span>
+                    <button class="edit-btn" data-field="bio"><i class="fas fa-pencil-alt"></i></button>
+                </div>
+            </div>
+        </div>
+
         <div class="actions">
             <button id="logoutBtn" class="btn btn-outline">Выйти</button>
         </div>

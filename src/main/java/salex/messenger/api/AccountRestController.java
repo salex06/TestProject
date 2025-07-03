@@ -31,7 +31,10 @@ public class AccountRestController {
                 .findUser(principal.getName())
                 .orElseThrow(() -> new UserNotFoundException("Пользователь не найден!"));
 
-        return new ResponseEntity<>(new UserInfo(user.getUsername()), HttpStatus.OK);
+        return new ResponseEntity<>(
+                new UserInfo(
+                        user.getUsername(), user.getName(), user.getSurname(), user.getPhotoPath(), user.getAbout()),
+                HttpStatus.OK);
     }
 
     @PostMapping("/quit")

@@ -50,7 +50,7 @@ class AccountRestControllerTest {
                         "UserNotFoundException",
                         "Пользователь не найден!"));
 
-        mockMvc.perform(get("/api/account"))
+        mockMvc.perform(get("/api/account").contentType("multipart/form-data"))
                 .andExpect(status().isNotFound())
                 .andExpect(content().json(expectedResponse));
     }
@@ -59,9 +59,9 @@ class AccountRestControllerTest {
     @DisplayName("Попытка получить данныые аккаунта, пользователь авторизован и есть в БД")
     @WithMockUser("friend")
     public void getUserData_WhenAuthorizedAndWasFoundInDatabase_ThenReturnData() throws Exception {
-        String expectedResponse = new ObjectMapper().writeValueAsString(new UserInfo("friend"));
-        User expectedUser = new User();
-        expectedUser.setUsername("friend");
+        String expectedResponse =
+                new ObjectMapper().writeValueAsString(new UserInfo("friend", "name", "surname", "123", "about"));
+        User expectedUser = new User(null, "friend", "pass", "name", "surname", "about", "123");
         when(userService.findUser("friend")).thenReturn(Optional.of(expectedUser));
 
         mockMvc.perform(get("/api/account"))

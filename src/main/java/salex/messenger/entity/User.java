@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import java.util.Collection;
 import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Entity
 @Table(name = "users")
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 public class User implements UserDetails {
@@ -28,6 +30,18 @@ public class User implements UserDetails {
     @NotBlank
     @Column(name = "password", nullable = false)
     private String encryptedPassword;
+
+    @Column(name = "name")
+    private String name;
+
+    @Column(name = "surname")
+    private String surname;
+
+    @Column(name = "about")
+    private String about;
+
+    @Column(name = "photo")
+    private String photoPath;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

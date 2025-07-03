@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const userData = await response.json();
-        updateUserGreeting(userData.username);
+        updateUserInfo(userData);
     } catch (error) {
         console.error('Ошибка:', error.message);
         redirectToLogin();
@@ -38,10 +38,43 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
     }
 });
 
-function updateUserGreeting(username) {
+function updateUserInfo(data) {
     const greetingElement = document.getElementById('account-username');
     if (greetingElement) {
-        greetingElement.textContent = `${username}`;
+        greetingElement.textContent = `${data.username}`;
+    }
+
+    const name = document.getElementById('first-name');
+    if(name){
+        name.textContent = `${data.name}`;
+    }
+
+    const surname = document.getElementById('last-name');
+    if(surname){
+        surname.textContent = `${data.surname}`;
+    }
+
+    const about = document.getElementById('bio');
+    if(about){
+        about.textContent = `${data.about}`;
+    }
+
+    loadUserAvatar(data.photoPath);
+}
+
+async function loadUserAvatar(filename) {
+    try {
+        const response = await fetch(`/api/images/${filename}`, {
+            method: 'GET',
+            credentials: 'include',
+        });
+        if (response.ok) {
+            const blob = await response.blob();
+            const imageUrl = URL.createObjectURL(blob);
+            document.getElementById('avatar-preview').src = imageUrl;
+        }
+    } catch (error) {
+        console.error('Ошибка загрузки аватара:', error);
     }
 }
 

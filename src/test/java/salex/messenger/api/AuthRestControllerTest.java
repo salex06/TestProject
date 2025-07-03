@@ -50,7 +50,7 @@ class AuthRestControllerTest {
     @DisplayName("Попытка зарегистрироваться с уже занятым username")
     public void signUp_WhenUsernameIsAlreadyTaken_ThenReturn400Response() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
-        SignUpRequest request = new SignUpRequest("user", "123");
+        SignUpRequest request = new SignUpRequest("user", "123", "123", "123", "123", null);
         when(userService.saveUser(any(SignUpRequest.class))).thenAnswer(ans -> {
             throw new UsernameAlreadyExistsException(
                     "Пользователь с именем '" + request.username() + "' уже существует");
@@ -62,8 +62,8 @@ class AuthRestControllerTest {
                 "Пользователь с именем '" + request.username() + "' уже существует"));
 
         mockMvc.perform(post("/api/auth/signup")
-                        .contentType("application/json")
-                        .content(mapper.writeValueAsBytes(request)))
+                        .content(mapper.writeValueAsBytes(request))
+                        .contentType("multipart/form-data"))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(expectedResponse));
     }
@@ -72,7 +72,7 @@ class AuthRestControllerTest {
     @DisplayName("Успешная попытка регистрации")
     public void signUp_WhenCorrectRequest_ThenSaveUserAndReturnOk() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
-        SignUpRequest request = new SignUpRequest("user", "123");
+        SignUpRequest request = new SignUpRequest("user", "123", "123", "123", "123", null);
         User savedUser = new User();
         savedUser.setId(1L);
         savedUser.setUsername("user");
@@ -82,7 +82,7 @@ class AuthRestControllerTest {
                 new SignUpResponse("Пользователь зарегистрирован", savedUser.getId(), savedUser.getUsername()));
 
         mockMvc.perform(post("/api/auth/signup")
-                        .contentType("application/json")
+                        .contentType("multipart/form-data")
                         .content(mapper.writeValueAsBytes(request)))
                 .andExpect(status().isCreated())
                 .andExpect(content().json(expectedResponse));

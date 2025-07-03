@@ -7,11 +7,12 @@ import org.springframework.data.jdbc.repository.config.EnableJdbcRepositories;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import salex.messenger.config.JwtConfig;
+import salex.messenger.config.LocalStorageConfig;
 
 @SpringBootApplication
 @EnableJdbcRepositories
 @EnableJpaRepositories
-@EnableConfigurationProperties({JwtConfig.class})
+@EnableConfigurationProperties({JwtConfig.class, LocalStorageConfig.class})
 @EnableWebSecurity
 public class MessengerApplication {
 
