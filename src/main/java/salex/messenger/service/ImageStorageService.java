@@ -3,6 +3,8 @@ package salex.messenger.service;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.UUID;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.core.io.PathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -61,9 +63,15 @@ public class ImageStorageService {
 
         if (resource.exists() && resource.isReadable()) {
             return resource;
+        } else if (!resource.exists()) {
+            return null;
         } else {
             throw new StorageException("Не удалось прочитать файл " + filename);
         }
+    }
+
+    public static String generateFilename(String username, MultipartFile file) {
+        return username + "-" + UUID.randomUUID() + '.' + FilenameUtils.getExtension(file.getOriginalFilename());
     }
 
     private static Path convertToPath(String pathStr) {

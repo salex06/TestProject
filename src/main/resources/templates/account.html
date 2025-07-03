@@ -6,6 +6,7 @@
     <title>Личный кабинет</title>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="/images/favicon.png"/>
 </head>
 <body>
 <div class="container">
@@ -54,6 +55,43 @@
     </main>
 </div>
 
+<div id="nameModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3>Изменение имени</h3>
+        <div class="form-group">
+            <label for="newName">Введите новое имя:</label>
+            <input type="text" id="newName" class="form-control">
+            <span id="nameError" class="error"></span>
+        </div>
+        <button id="saveNameBtn" class="btn btn-primary">Сохранить</button>
+    </div>
+</div>
+
+<div id="surnameModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3>Изменение фамилии</h3>
+        <div class="form-group">
+            <label for="newName">Введите новую фамилию:</label>
+            <input type="text" id="newSurname" class="form-control">
+            <span id="surnameError" class="error"></span>
+        </div>
+        <button id="saveSurnameBtn" class="btn btn-primary">Сохранить</button>
+    </div>
+</div>
+<div id="aboutModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3>Изменение информации о себе</h3>
+        <div class="form-group">
+            <label for="newAbout">Расскажите о себе:</label>
+            <textarea id="newAbout" class="form-control" rows="5"></textarea>
+            <span id="aboutError" class="error"></span>
+        </div>
+        <button id="saveAboutBtn" class="btn btn-primary">Сохранить</button>
+    </div>
+</div>
 <script src="/js/account.js"></script>
 </body>
 </html>

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,8 +19,11 @@ public class ImageRestController {
     @GetMapping("/{filename}")
     public ResponseEntity<?> getImage(@PathVariable String filename) {
         Resource image = storageService.loadAsResource(filename);
-        String contentType = determineContentType(image);
+        if (image == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
 
+        String contentType = determineContentType(image);
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(contentType))
                 .body(image);

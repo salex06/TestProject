@@ -62,7 +62,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     }
                 }
             }
-        } catch (ExpiredJwtException ex) {
+        } catch (ExpiredJwtException | UserNotFoundException ex) {
             request.setAttribute("exception", ex);
         } catch (BadCredentialsException | UnsupportedJwtException | MalformedJwtException ex) {
             // TODO: логирование

@@ -38,3 +38,4 @@ build/
 ### images ###
 /src/main/resources/static/images/**
 !/src/main/resources/static/images/no_img.jpg
+!/src/main/resources/static/images/favicon.png

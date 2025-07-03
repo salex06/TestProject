@@ -1,11 +1,13 @@
 package salex.messenger.service;
 
 import java.util.Optional;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.io.FilenameUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import salex.messenger.dto.account.update.about.UpdateAboutRequest;
+import salex.messenger.dto.account.update.name.UpdateNameRequest;
+import salex.messenger.dto.account.update.photo.UpdatePhotoRequest;
+import salex.messenger.dto.account.update.surname.UpdateSurnameRequest;
 import salex.messenger.dto.signup.SignUpRequest;
 import salex.messenger.entity.User;
 import salex.messenger.exception.UserNotFoundException;
@@ -33,13 +35,13 @@ public class UserService {
                     "Пользователь с именем '" + signUpRequest.username() + "' уже существует");
         }
 
-        imageStorageService.validateImageFile(signUpRequest.photo());
-        String filename = imageStorageService.store(
-                signUpRequest.photo(),
-                signUpRequest.username()
-                        + "-"
-                        + UUID.randomUUID()
-                        + '.' + FilenameUtils.getExtension(signUpRequest.photo().getOriginalFilename()));
+        String filename = null;
+        if (!signUpRequest.photo().isEmpty()) {
+            imageStorageService.validateImageFile(signUpRequest.photo());
+            filename = imageStorageService.store(
+                    signUpRequest.photo(),
+                    ImageStorageService.generateFilename(signUpRequest.username(), signUpRequest.photo()));
+        }
 
         User user = new User(
                 null,
@@ -52,6 +54,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    // TODO: заменить DTO signUpRequest на RemoveUserRequest
     public void removeUser(SignUpRequest signUpRequest) {
         User user = userRepository
                 .findByUsername(signUpRequest.username())
@@ -59,5 +62,53 @@ public class UserService {
                         () -> new UserNotFoundException("Пользователь '" + signUpRequest.username() + "' не найден"));
 
         userRepository.deleteById(user.getId());
+    }
+
+    public User updateName(String username, UpdateNameRequest request) {
+        User user = userRepository
+                .findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("Пользователь '" + username + "' не найден"));
+
+        user.setName(request.newName());
+
+        return userRepository.save(user);
+    }
+
+    public User updateSurname(String username, UpdateSurnameRequest request) {
+        User user = userRepository
+                .findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("Пользователь '" + username + "' не найден"));
+
+        user.setSurname(request.newSurname());
+
+        return userRepository.save(user);
+    }
+
+    public User updateAbout(String username, UpdateAboutRequest request) {
+        User user = userRepository
+                .findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("Пользователь '" + username + "' не найден"));
+
+        user.setAbout(request.newAbout());
+
+        return userRepository.save(user);
+    }
+
+    public User replacePhoto(String username, UpdatePhotoRequest request) {
+        User user = userRepository
+                .findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("Пользователь '" + username + "' не найден"));
+
+        if (user.getPhotoPath() != null) {
+            imageStorageService.remove(user.getPhotoPath());
+            user.setPhotoPath(null);
+        }
+
+        imageStorageService.validateImageFile(request.newPhoto());
+        String filepath = imageStorageService.store(
+                request.newPhoto(), ImageStorageService.generateFilename(user.getUsername(), request.newPhoto()));
+
+        user.setPhotoPath(filepath);
+        return userRepository.save(user);
     }
 }
