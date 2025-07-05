@@ -9,5 +9,6 @@
 
     <include relativeToChangelogFile="true" file="00-initial-schema.sql"/>
     <include relativeToChangelogFile="true" file="01-add-more-user-info.sql"/>
+    <include relativeToChangelogFile="true" file="02-create-index-on-username.sql"/>
 
 </databaseChangeLog>

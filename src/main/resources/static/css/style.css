@@ -518,6 +518,38 @@ body {
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     margin-top: 5px;
     display: none;
+    z-index: 1000;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.search-result-item{
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    margin: 3% 0;
+}
+
+.search-result-item img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 12px;
+    border: 2px solid #e9ecef;
+    transition: border-color 0.3s ease;
+}
+
+.search-result-item span{
+    font-size: 18px;
+}
+
+#search-results{
+    padding: 3%;
+}
+
+.search-result-item-username{
+    font-weight: bold;
 }
 
 .header-right {
@@ -586,5 +618,16 @@ body {
 
     .user-profile {
         margin-top: 10px;
+    }
+
+    .search-result-item{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-evenly;
+    }
+
+    .search-result-item img{
+        margin: 0 auto;
     }
 }

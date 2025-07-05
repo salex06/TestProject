@@ -1,10 +1,10 @@
-document.addEventListener('DOMContentLoaded', loadPhotoFromServer);
+document.addEventListener('DOMContentLoaded', loadInfoFromServer);
 
 document.addEventListener("avatarWasChanged", function(event) {
-    loadPhotoFromServer();
+    loadInfoFromServer();
 });
 
-async function loadPhotoFromServer() {
+async function loadInfoFromServer() {
     try {
         const response = await fetch('/api/account', {
             method: 'GET',
@@ -52,5 +52,84 @@ async function loadUserAvatarForHeader(filename) {
         }
     } catch (error) {
         console.error('Ошибка загрузки аватара:', error);
+    }
+}
+
+
+//Поиск пользователей
+let currentPage = 0;
+const pageSize = 5;
+let isLoading = false;
+const searchInput = document.getElementById('global-search');
+const dropdownList = document.getElementById('search-results');
+
+let debounceTimer;
+searchInput.addEventListener('input', () => {
+    clearTimeout(debounceTimer);
+    dropdownList.style.display = "none";
+    debounceTimer = setTimeout(() => {
+        if (searchInput.value.length > 2) {
+            currentPage = 0;
+            dropdownList.innerHTML = '';
+            dropdownList.addEventListener('scroll', handleScroll);
+            fetchSuggestions(searchInput.value);
+        } else {
+            dropdownList.innerHTML = '';
+        }
+    }, 300);
+});
+
+async function fetchSuggestions(query) {
+    if (isLoading) return; // Не вызывать новый запрос, пока идёт текущий
+    isLoading = true;
+
+    try {
+        const response = await fetch(`/api/users/search?query=${encodeURIComponent(query)}&page=${currentPage}&size=${pageSize}`);
+        if(response.status == '401'){
+            redirectToLogin();
+        }
+        const data = await response.json();
+
+        if(data.content.length == 0 && currentPage == 0){
+            dropdownList.innerHTML = `
+               <div class="search-result-item">
+                   <span>Ничего не найдено</span>
+               </div>`;
+            resultsContainer.style.display = "block";
+            return;
+        }
+
+        // Добавляем новые элементы в список
+        data.content.forEach(user => {
+            dropdownList.innerHTML +=
+                `<div class="search-result-item" data-username="${user.username}">
+                    <img src="/images/${user.photoPath || 'no_img.jpg'}" alt="${user.username}">
+                    <span class="search-result-item-username">${user.username} </span>
+                    <span class="search-result-item-otherInfo">${user.name} ${user.surname}</span>
+                </div>`;
+        });
+
+        currentPage++;
+
+        if (currentPage >= data.totalPages) {
+            dropdownList.removeEventListener('scroll', handleScroll);
+        }
+
+        dropdownList.style.display = "block";
+    } catch (error) {
+        console.error("Ошибка загрузки:", error);
+    } finally {
+        isLoading = false;
+    }
+}
+
+function isScrollNearBottom() {
+    const { scrollTop, clientHeight, scrollHeight } = dropdownList;
+    return scrollTop + clientHeight >= scrollHeight - 20;
+}
+
+function handleScroll() {
+    if (isScrollNearBottom()) {
+        fetchSuggestions(searchInput.value);
     }
 }

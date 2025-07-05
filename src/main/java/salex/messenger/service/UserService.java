@@ -2,6 +2,8 @@ package salex.messenger.service;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import salex.messenger.dto.account.remove.RemoveUserRequest;
@@ -110,5 +112,9 @@ public class UserService {
 
         user.setPhotoPath(filepath);
         return userRepository.save(user);
+    }
+
+    public Page<User> getUsersByUsernamePattern(String query, Pageable pageable, String principalUsername) {
+        return userRepository.suggestUsernames(query, pageable, principalUsername);
     }
 }
