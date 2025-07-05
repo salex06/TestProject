@@ -61,6 +61,9 @@ async function loadUserAvatar(filename) {
             const blob = await response.blob();
             const imageUrl = URL.createObjectURL(blob);
             document.getElementById('avatar-preview').src = imageUrl;
+
+            let event = new Event("avatarWasChanged", {bubbles: true});
+            document.dispatchEvent(event);
         }
     } catch (error) {
         console.error('Ошибка загрузки аватара:', error);
@@ -68,7 +71,7 @@ async function loadUserAvatar(filename) {
 }
 
 //Выход из аккаунта
-document.getElementById('logoutBtn').addEventListener('click', async () => {
+async function quit() {
     const response = await fetch('/api/account/quit', {
         method: 'POST',
         credentials: 'include',
@@ -80,7 +83,9 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
     if(response.ok){
         redirectToLogin();
     }
-});
+}
+document.getElementById('logoutBtn').addEventListener('click', quit);
+document.getElementById('headerLogoutBtn').addEventListener('click', quit);
 
 function redirectToLogin() {
     window.location.href = '/signin';

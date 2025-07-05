@@ -9,6 +9,42 @@
     <link rel="icon" type="image/png" href="/images/favicon.png"/>
 </head>
 <body>
+<header class="account-header">
+    <div class="header-left">
+        <nav class="header-nav">
+            <a href="/contacts" class="nav-link">
+                <i class="fas fa-address-book"></i>
+                <span>Мои контакты</span>
+            </a>
+            <a href="/chats" class="nav-link">
+                <i class="fas fa-comments"></i>
+                <span>Мои чаты</span>
+            </a>
+        </nav>
+    </div>
+
+    <div class="header-center">
+        <div class="search-container">
+            <input type="text" id="global-search" placeholder="Поиск пользователей...">
+            <div id="search-results" class="search-dropdown"></div>
+        </div>
+    </div>
+
+    <div class="header-right">
+        <div class="user-profile">
+            <div class="user-avatar">
+                <img id="header-avatar" src="/images/no_img.jpg" alt="Аватар">
+            </div>
+            <div class="user-info">
+                <span id="header-username"></span>
+                <button id="headerLogoutBtn" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</header>
+
 <div class="container">
     <main class="account-card">
         <!-- Аватар пользователя -->
@@ -93,5 +129,6 @@
     </div>
 </div>
 <script src="/js/account.js"></script>
+<script src="/js/header.js"></script>
 </body>
 </html>
