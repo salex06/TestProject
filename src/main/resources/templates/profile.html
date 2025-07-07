@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль пользователя</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="/images/favicon.png"/>
+</head>
+<body>
+<header class="account-header">
+    <div class="header-left">
+        <nav class="header-nav">
+            <a href="/contacts" class="nav-link">
+                <i class="fas fa-address-book"></i>
+                <span>Мои контакты</span>
+            </a>
+            <a href="/chats" class="nav-link">
+                <i class="fas fa-comments"></i>
+                <span>Мои чаты</span>
+            </a>
+        </nav>
+    </div>
+
+    <div class="header-center">
+        <div class="search-container">
+            <input type="text" id="global-search" placeholder="Поиск пользователей...">
+            <div id="search-results" class="search-dropdown"></div>
+        </div>
+    </div>
+
+    <div class="header-right">
+        <div class="user-profile">
+            <div class="user-avatar">
+                <img id="header-avatar" src="/images/no_img.jpg" alt="Аватар">
+            </div>
+            <div class="user-info">
+                <span id="header-username"></span>
+                <button id="headerLogoutBtn" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <main class="account-card">
+        <!-- Аватар пользователя -->
+        <div class="avatar-section">
+            <label for="avatar-upload" class="avatar-edit">
+                <img id="avatar-preview" src="/images/no_img.jpg" alt="Аватар">
+                <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
+            </label>
+        </div>
+
+        <h1><span id="profile-username"></span></h1>
+
+        <!-- Информация профиля -->
+        <div class="profile-info">
+            <div class="info-item">
+                <label>Имя:</label>
+                <div class="info-value">
+                    <span id="first-name"></span>
+                </div>
+            </div>
+
+            <div class="info-item">
+                <label>Фамилия:</label>
+                <div class="info-value">
+                    <span id="last-name"></span>
+                </div>
+            </div>
+
+            <div class="info-item">
+                <label>О себе:</label>
+                <div class="info-value">
+                    <span id="bio"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button id="goToChatBtn" class="btn">Перейти в чат</button>
+            <button id="addToContactBtn" class="btn btn-outline">Добавить в контакты</button>
+        </div>
+    </main>
+</div>
+
+
+<script src="/js/profile.js"></script>
+<script src="/js/header.js"></script>
+</body>
+</html>

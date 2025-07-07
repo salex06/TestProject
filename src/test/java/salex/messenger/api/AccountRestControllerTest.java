@@ -27,7 +27,7 @@ import salex.messenger.dto.account.update.photo.UpdatePhotoResponse;
 import salex.messenger.dto.account.update.surname.UpdateSurnameRequest;
 import salex.messenger.dto.account.update.surname.UpdateSurnameResponse;
 import salex.messenger.dto.error.ApiErrorResponse;
-import salex.messenger.dto.users.UserInfo;
+import salex.messenger.dto.users.AccountInfo;
 import salex.messenger.entity.User;
 import salex.messenger.exception.UserNotFoundException;
 import salex.messenger.service.UserService;
@@ -71,7 +71,7 @@ class AccountRestControllerTest {
     @WithMockUser("friend")
     public void getUserData_WhenAuthorizedAndWasFoundInDatabase_ThenReturnData() throws Exception {
         String expectedResponse =
-                new ObjectMapper().writeValueAsString(new UserInfo("friend", "name", "surname", "123", "about"));
+                new ObjectMapper().writeValueAsString(new AccountInfo("friend", "name", "surname", "123", "about"));
         User expectedUser = new User(null, "friend", "pass", "name", "surname", "about", "123");
         when(userService.findUser("friend")).thenReturn(Optional.of(expectedUser));
 

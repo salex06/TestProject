@@ -15,7 +15,7 @@ import salex.messenger.dto.account.update.photo.UpdatePhotoRequest;
 import salex.messenger.dto.account.update.photo.UpdatePhotoResponse;
 import salex.messenger.dto.account.update.surname.UpdateSurnameRequest;
 import salex.messenger.dto.account.update.surname.UpdateSurnameResponse;
-import salex.messenger.dto.users.UserInfo;
+import salex.messenger.dto.users.AccountInfo;
 import salex.messenger.entity.User;
 import salex.messenger.exception.UserNotFoundException;
 import salex.messenger.service.UserService;
@@ -37,7 +37,7 @@ public class AccountRestController {
                 .orElseThrow(() -> new UserNotFoundException("Пользователь не найден!"));
 
         return new ResponseEntity<>(
-                new UserInfo(
+                new AccountInfo(
                         user.getUsername(), user.getName(), user.getSurname(), user.getPhotoPath(), user.getAbout()),
                 HttpStatus.OK);
     }

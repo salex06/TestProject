@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.security.Principal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @Controller
 public class MainController {
@@ -19,5 +20,10 @@ public class MainController {
     @GetMapping("/account")
     public String account() {
         return "account";
+    }
+
+    @GetMapping("/profile/{username}")
+    public String profile(@PathVariable String username) {
+        return "profile";
     }
 }

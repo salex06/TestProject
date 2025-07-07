@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import salex.messenger.dto.users.SearchResponse;
-import salex.messenger.dto.users.UserInfo;
+import salex.messenger.dto.users.UserProfileInfo;
 import salex.messenger.entity.User;
 import salex.messenger.service.UserService;
 
@@ -41,8 +41,8 @@ public class UsersRestController {
                 HttpStatus.OK);
     }
 
-    private UserInfo convertToUserInfo(User user) {
-        return new UserInfo(
-                user.getUsername(), user.getName(), user.getSurname(), user.getPhotoPath(), user.getAbout());
+    private UserProfileInfo convertToUserInfo(User user) {
+        return new UserProfileInfo(
+                user.getUsername(), user.getName(), user.getSurname(), user.getAbout(), user.getPhotoPath());
     }
 }

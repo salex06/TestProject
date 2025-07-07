@@ -4,6 +4,14 @@ document.addEventListener("avatarWasChanged", function(event) {
     loadInfoFromServer();
 });
 
+document.getElementById('header-avatar').addEventListener("click", (e) => {
+    window.location.href = "/account";
+})
+
+document.getElementById('header-username').addEventListener("click", (e) => {
+    window.location.href = "/account";
+})
+
 async function loadInfoFromServer() {
     try {
         const response = await fetch('/api/account', {
@@ -55,13 +63,21 @@ async function loadUserAvatarForHeader(filename) {
     }
 }
 
-
 //Поиск пользователей
 let currentPage = 0;
 const pageSize = 5;
 let isLoading = false;
 const searchInput = document.getElementById('global-search');
 const dropdownList = document.getElementById('search-results');
+
+dropdownList.addEventListener('click', (event) => {
+    const clickedItem = event.target.closest('.search-result-item');
+
+    if (clickedItem) {
+        const name = clickedItem.dataset.username; // Получаем data-name
+        window.location.href = `/profile/${name}`;
+    }
+});
 
 let debounceTimer;
 searchInput.addEventListener('input', () => {
@@ -132,4 +148,24 @@ function handleScroll() {
     if (isScrollNearBottom()) {
         fetchSuggestions(searchInput.value);
     }
+}
+
+//Выход из аккаунта
+async function quit() {
+    const response = await fetch('/api/account/quit', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Accept': 'application/json'
+        }
+    });
+
+    if(response.ok){
+        redirectToLogin();
+    }
+}
+document.getElementById('headerLogoutBtn').addEventListener('click', quit);
+
+function redirectToLogin() {
+    window.location.href = '/signin';
 }

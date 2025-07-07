@@ -528,6 +528,7 @@ body {
     align-items: center;
     justify-content: space-evenly;
     margin: 3% 0;
+    cursor: pointer;
 }
 
 .search-result-item img {
@@ -562,6 +563,7 @@ body {
     display: flex;
     align-items: center;
     gap: 15px;
+    cursor: pointer;
 }
 
 .user-avatar {
