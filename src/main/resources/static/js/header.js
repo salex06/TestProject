@@ -111,7 +111,7 @@ async function fetchSuggestions(query) {
                <div class="search-result-item">
                    <span>Ничего не найдено</span>
                </div>`;
-            resultsContainer.style.display = "block";
+            dropdownList.style.display = "block";
             return;
         }
 

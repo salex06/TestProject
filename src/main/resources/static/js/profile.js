@@ -1,6 +1,6 @@
 //Получение информации о профиле при загрузке страницы
-document.addEventListener('DOMContentLoaded', async () => {
 const username = window.location.pathname.split('/profile/')[1];
+document.addEventListener('DOMContentLoaded', async () => {
     try {
         const response = await fetch(`/api/profile/${username}`, {
             method: 'GET',
@@ -70,6 +70,11 @@ async function loadUserAvatar(filename) {
         console.error('Ошибка загрузки аватара:', error);
     }
 }
+
+//Обработчик нажатия на кнопку перехода к чату
+document.getElementById("goToChatBtn").addEventListener("click", (e) => {
+    window.location.href = `/chats?receiverUsername=${username}`;
+});
 
 function redirectToMainPage() {
     window.location.href = '/';

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import salex.messenger.dto.users.SearchResponse;
 import salex.messenger.dto.users.UserProfileInfo;
 import salex.messenger.entity.User;
+import salex.messenger.exception.UserNotFoundException;
 import salex.messenger.service.UserService;
 
 @RestController
@@ -39,6 +40,19 @@ public class UsersRestController {
                         users.getNumber(),
                         users.getSize()),
                 HttpStatus.OK);
+    }
+
+    @GetMapping("/photo")
+    public ResponseEntity<?> getPhotoPath(@RequestParam(name = "username") String username, Principal principal) {
+        if (principal == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        User user = userService
+                .findUser(username)
+                .orElseThrow(() -> new UserNotFoundException("Пользователь '" + username + "' не найден"));
+
+        return ResponseEntity.ok(user.getPhotoPath());
     }
 
     private UserProfileInfo convertToUserInfo(User user) {

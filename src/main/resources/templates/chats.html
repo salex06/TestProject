@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мои чаты</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="/images/favicon.png"/>
+</head>
+<body>
+<header class="account-header">
+    <div class="header-left">
+        <nav class="header-nav">
+            <a href="/contacts" class="nav-link">
+                <i class="fas fa-address-book"></i>
+                <span>Мои контакты</span>
+            </a>
+            <a href="/chats" class="nav-link active">
+                <i class="fas fa-comments"></i>
+                <span>Мои чаты</span>
+            </a>
+        </nav>
+    </div>
+
+    <div class="header-center">
+        <div class="search-container">
+            <input type="text" id="global-search" placeholder="Поиск пользователей...">
+            <div id="search-results" class="search-dropdown"></div>
+        </div>
+    </div>
+
+    <div class="header-right">
+        <div class="user-profile">
+            <div class="user-avatar">
+                <img id="header-avatar" src="/images/no_img.jpg" alt="Аватар">
+            </div>
+            <div class="user-info">
+                <span id="header-username"></span>
+                <button id="headerLogoutBtn" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="chat-container">
+    <!-- Боковая панель с контактами -->
+    <aside class="chat-sidebar" id="chat-sidebar">
+        <div class="sidebar-header">
+            <h3>Мои чаты</h3>
+<!--            <button class="new-chat-btn">-->
+<!--                <i class="fas fa-plus"></i>-->
+<!--            </button>-->
+        </div>
+
+        <div class="chat-list" id="chat-list">
+            <!-- Пример чата -->
+<!--            <div class="chat-item active">-->
+<!--                <div class="chat-avatar">-->
+<!--                    <img src="/images/user1.jpg" alt="Аватар">-->
+<!--                </div>-->
+<!--                <div class="chat-info">-->
+<!--                    <div class="chat-name">Алексей Петров</div>-->
+<!--                    <div class="chat-preview">Привет, как дела?</div>-->
+<!--                </div>-->
+<!--                <div class="chat-meta">-->
+<!--                    <div class="chat-time">12:30</div>-->
+<!--                    <div class="unread-count">3</div>-->
+<!--                </div>-->
+<!--            </div>-->
+
+<!--            &lt;!&ndash; Ещё чаты &ndash;&gt;-->
+<!--            <div class="chat-item">-->
+<!--                <div class="chat-avatar">-->
+<!--                    <img src="/images/user2.jpg" alt="Аватар">-->
+<!--                </div>-->
+<!--                <div class="chat-info">-->
+<!--                    <div class="chat-name">Мария Иванова</div>-->
+<!--                    <div class="chat-preview">Договорились на завтра!</div>-->
+<!--                </div>-->
+<!--                <div class="chat-meta">-->
+<!--                    <div class="chat-time">Вчера</div>-->
+<!--                </div>-->
+<!--            </div>-->
+        </div>
+    </aside>
+
+    <!-- Основная область чата -->
+    <main class="chat-main" id="chat-main">
+        <div class="chat-header">
+            <div class="current-chat-user" id="current-chat-user"></div>
+            <div class="chat-actions">
+<!--                <button class="chat-action-btn">-->
+<!--                    <i class="fas fa-phone"></i>-->
+<!--                </button>-->
+<!--                <button class="chat-action-btn">-->
+<!--                    <i class="fas fa-video"></i>-->
+<!--                </button>-->
+<!--                <button class="chat-action-btn">-->
+<!--                    <i class="fas fa-ellipsis-v"></i>-->
+<!--                </button>-->
+                <button class="chat-action-btn hidden" id="remove-chat">
+                    <i class="fa fa-trash"></i>
+                </button>
+                <button class="chat-action-btn hidden" id="close-chat">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="chat-messages" id="chat-messages">
+            <!-- Пример сообщений -->
+<!--            <div class="message-day-divider">-->
+<!--                <span>Сегодня</span>-->
+<!--            </div>-->
+
+<!--            <div class="message received">-->
+<!--                <div class="message-content">-->
+<!--                    Привет! Как твои дела?-->
+<!--                </div>-->
+<!--                <div class="message-time">12:30</div>-->
+<!--            </div>-->
+
+<!--            <div class="message sent">-->
+<!--                <div class="message-content">-->
+<!--                    Отлично, спасибо! А у тебя как?-->
+<!--                </div>-->
+<!--                <div class="message-time">12:32</div>-->
+<!--            </div>-->
+        </div>
+
+        <div class="chat-input">
+            <button class="attach-btn">
+                <i class="fas fa-paperclip"></i>
+            </button>
+            <input id="message-input" type="text" placeholder="Напишите сообщение...">
+            <button id="message-btn" class="send-btn">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+<script src="/js/header.js"></script>
+<script src="/js/chat.js"></script>
+</body>
+</html>

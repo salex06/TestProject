@@ -35,7 +35,7 @@ public class SecurityConfig {
                         response.setStatus(HttpStatus.FORBIDDEN.value());
                         response.getWriter()
                                 .write(String.format(
-                                        "{\"error\":\"%s\",\"message\":\"%s\"}",
+                                        "{\"error\":\"%s\",\"text\":\"%s\"}",
                                         HttpStatus.FORBIDDEN.name(), "Доступ запрещен"));
                     } else {
                         response.sendRedirect("/403");

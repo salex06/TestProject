@@ -16,6 +16,7 @@ import salex.messenger.dto.account.update.photo.UpdatePhotoResponse;
 import salex.messenger.dto.account.update.surname.UpdateSurnameRequest;
 import salex.messenger.dto.account.update.surname.UpdateSurnameResponse;
 import salex.messenger.dto.users.AccountInfo;
+import salex.messenger.dto.users.UsernameResponse;
 import salex.messenger.entity.User;
 import salex.messenger.exception.UserNotFoundException;
 import salex.messenger.service.UserService;
@@ -40,6 +41,15 @@ public class AccountRestController {
                 new AccountInfo(
                         user.getUsername(), user.getName(), user.getSurname(), user.getPhotoPath(), user.getAbout()),
                 HttpStatus.OK);
+    }
+
+    @GetMapping("/username")
+    public ResponseEntity<?> getUsername(Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        return ResponseEntity.ok(new UsernameResponse(principal.getName()));
     }
 
     @PatchMapping("/name")

@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.data.jdbc.repository.config.EnableJdbcRepositories;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import salex.messenger.config.JwtConfig;
 import salex.messenger.config.LocalStorageConfig;
 
@@ -14,6 +15,7 @@ import salex.messenger.config.LocalStorageConfig;
 @EnableJpaRepositories
 @EnableConfigurationProperties({JwtConfig.class, LocalStorageConfig.class})
 @EnableWebSecurity
+@EnableWebSocketMessageBroker
 public class MessengerApplication {
 
     public static void main(String[] args) {
