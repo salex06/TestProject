@@ -20,11 +20,35 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const userData = await response.json();
         updateUserInfo(userData);
+        if(await isContact(username)){
+            document.getElementById('addToContactBtn').classList.add('hidden');
+            document.getElementById('removeFromContactsBtn').classList.remove('hidden');
+        }
     } catch (error) {
         console.error('Ошибка:', error.message);
         redirectToMainPage();
     }
 });
+
+async function isContact(username){
+    const response = await fetch(`/api/contacts/check?owner=${await getUsername()}&contact=${username}`, {
+        method: "GET",
+        credentials: "include",
+        headers : {
+            "Accept" : "application/json"
+        }
+    });
+
+    if(response.status == 401){
+        window.location.href = "/signin";
+    }
+
+    const data = await response.text();
+    if(response.ok && data == "true"){
+        return true;
+    }
+    return false;
+}
 
 //Загрузка информации о пользователе
 function updateUserInfo(data) {
@@ -48,7 +72,8 @@ function updateUserInfo(data) {
         about.textContent = `${data.about}`;
     }
 
-    loadUserAvatar(data.photoPath);
+    if(data.photoPath)
+        loadUserAvatar(data.photoPath);
 }
 
 //Загрузка фото профиля
@@ -76,6 +101,75 @@ document.getElementById("goToChatBtn").addEventListener("click", (e) => {
     window.location.href = `/chats?receiverUsername=${username}`;
 });
 
+//Обработчик добавления пользователя в контакты
+document.getElementById("addToContactBtn").addEventListener("click", async (e) =>{
+    let ownerUsername = await getUsername();
+    const response = await fetch("/api/contacts", {
+        method: 'POST',
+        credentials: "include",
+        headers: {
+            "Accept" : "application/json",
+            "Content-Type" : "application/json"
+        },
+        body: JSON.stringify({
+              'owner' : ownerUsername,
+              'contact' : username
+        })
+    });
+
+    if(response.status == 401){
+        window.location.href = "/signin";
+    }
+
+    if(response.ok){
+        document.getElementById('addToContactBtn').classList.add('hidden');
+        document.getElementById('removeFromContactsBtn').classList.remove('hidden');
+    }
+});
+
+//Обработчик удаления пользователя из контактов
+document.getElementById("removeFromContactsBtn").addEventListener("click", async (e) => {
+    let ownerUsername = await getUsername();
+    const response = await fetch("/api/contacts", {
+        method: 'DELETE',
+        credentials: "include",
+        headers: {
+            "Accept" : "application/json",
+            "Content-Type" : "application/json"
+        },
+        body: JSON.stringify({
+              'owner' : ownerUsername,
+              'contact' : username
+        })
+    });
+
+    if(response.status == 401){
+        window.location.href = "/signin";
+    }
+
+    if(response.ok){
+        document.getElementById('addToContactBtn').classList.remove('hidden');
+        document.getElementById('removeFromContactsBtn').classList.add('hidden');
+    }
+});
+
 function redirectToMainPage() {
     window.location.href = '/';
+}
+
+async function getUsername(){
+    const response = await fetch('/api/account/username', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Accept': 'application/json'
+        }
+    });
+
+    if(response.status == 401){
+        window.location.href = "/signin";
+    }
+
+    let data = await response.json();
+    return data.username;
 }

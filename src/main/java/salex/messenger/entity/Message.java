@@ -29,11 +29,11 @@ public class Message {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "sender_id", referencedColumnName = "id")
     private User sender;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "receiver_id", referencedColumnName = "id")
     private User receiver;
 }

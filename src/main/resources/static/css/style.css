@@ -25,7 +25,7 @@ body {
 
 .container {
     width: 100%;
-    max-width: 400px;
+    max-width: 700px;
     margin: 0 auto;
 }
 
@@ -922,4 +922,92 @@ body {
 
 .hidden{
     display: none;
+}
+
+/* ===== Стили страницы контактов ===== */
+
+.contacts-title {
+    color: #2c3e50;
+    font-size: 24px;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ecf0f1;
+}
+
+.contact-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.contacts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.contact-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.contact-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.contact-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-grow: 1;
+    cursor: pointer;
+}
+
+.contact-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.contact-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.contact-username {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 3px;
+}
+
+.contact-name {
+    color: #7f8c8d;
+    font-size: 14px;
+}
+
+.contact-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* Адаптивность */
+@media (max-width: 600px) {
+    .contact-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .contact-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
 }

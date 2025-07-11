@@ -36,4 +36,9 @@ public class MainController {
             model.addAttribute("receiverUsername", receiverUsername);
         return "chats";
     }
+
+    @GetMapping("/contacts")
+    public String contacts() {
+        return "contacts";
+    }
 }
