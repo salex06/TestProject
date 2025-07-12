@@ -1,5 +1,6 @@
 package salex.messenger.api;
 
+import jakarta.validation.Valid;
 import java.security.Principal;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +42,7 @@ public class ContactRestController {
     }
 
     @PostMapping("")
-    public ResponseEntity<?> saveContact(@RequestBody SaveContactRequest request, Principal principal) {
+    public ResponseEntity<?> saveContact(@Valid @RequestBody SaveContactRequest request, Principal principal) {
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -55,7 +56,7 @@ public class ContactRestController {
     }
 
     @DeleteMapping("")
-    public ResponseEntity<?> removeContact(@RequestBody RemoveContactRequest request, Principal principal) {
+    public ResponseEntity<?> removeContact(@Valid @RequestBody RemoveContactRequest request, Principal principal) {
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }

@@ -1,3 +1,5 @@
 package salex.messenger.dto.chat.messages;
 
-public record SimpleMessage(String text) {}
+import jakarta.validation.constraints.NotBlank;
+
+public record SimpleMessage(@NotBlank String text) {}

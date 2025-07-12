@@ -1,3 +1,6 @@
 package salex.messenger.dto.signup;
 
-public record SignUpResponse(String message, Long userId, String username) {}
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+public record SignUpResponse(String message, @NotNull Long userId, @NotBlank String username) {}

@@ -1,3 +1,5 @@
 package salex.messenger.dto.account.remove;
 
-public record RemoveUserRequest(String username) {}
+import jakarta.validation.constraints.NotBlank;
+
+public record RemoveUserRequest(@NotBlank String username) {}

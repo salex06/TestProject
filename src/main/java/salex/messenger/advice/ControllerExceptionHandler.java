@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -48,6 +49,11 @@ public class ControllerExceptionHandler {
     @ExceptionHandler(StorageException.class)
     public ResponseEntity<?> handleStorageException(@NotNull StorageException ex) {
         return handleIncorrectRequest(ex.getMessage(), ex, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<?> handleMethodArgumentNotValidException(@NotNull MethodArgumentNotValidException ex) {
+        return handleIncorrectRequest("Некорректные параметры", ex, HttpStatus.BAD_REQUEST);
     }
 
     private ResponseEntity<ApiErrorResponse> handleIncorrectRequest(

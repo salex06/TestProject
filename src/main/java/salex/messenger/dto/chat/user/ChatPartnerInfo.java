@@ -1,3 +1,5 @@
 package salex.messenger.dto.chat.user;
 
-public record ChatPartnerInfo(String username, String photoPath) {}
+import jakarta.validation.constraints.NotBlank;
+
+public record ChatPartnerInfo(@NotBlank String username, String photoPath) {}

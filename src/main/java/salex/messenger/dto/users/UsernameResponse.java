@@ -1,3 +1,5 @@
 package salex.messenger.dto.users;
 
-public record UsernameResponse(String username) {}
+import jakarta.validation.constraints.NotBlank;
+
+public record UsernameResponse(@NotBlank String username) {}

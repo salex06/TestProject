@@ -1,3 +1,5 @@
 package salex.messenger.dto.signin;
 
-public record JwtResponse(String token) {}
+import jakarta.validation.constraints.NotBlank;
+
+public record JwtResponse(@NotBlank String token) {}

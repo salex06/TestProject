@@ -1,3 +1,5 @@
 package salex.messenger.dto.contact;
 
-public record RemoveContactRequest(String owner, String contact) {}
+import jakarta.validation.constraints.NotBlank;
+
+public record RemoveContactRequest(@NotBlank String owner, @NotBlank String contact) {}

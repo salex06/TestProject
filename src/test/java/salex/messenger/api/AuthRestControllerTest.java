@@ -3,6 +3,7 @@ package salex.messenger.api;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
@@ -50,7 +52,7 @@ class AuthRestControllerTest {
     @DisplayName("Попытка зарегистрироваться с уже занятым username")
     public void signUp_WhenUsernameIsAlreadyTaken_ThenReturn400Response() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
-        SignUpRequest request = new SignUpRequest("user", "123", "123", "123", "123", null);
+        SignUpRequest request = new SignUpRequest("User", "Userr123", "123", "123", "123", null);
         when(userService.saveUser(any(SignUpRequest.class))).thenAnswer(ans -> {
             throw new UsernameAlreadyExistsException(
                     "Пользователь с именем '" + request.username() + "' уже существует");
@@ -61,9 +63,13 @@ class AuthRestControllerTest {
                 "UsernameAlreadyExistsException",
                 "Пользователь с именем '" + request.username() + "' уже существует"));
 
-        mockMvc.perform(post("/api/auth/signup")
-                        .content(mapper.writeValueAsBytes(request))
-                        .contentType("multipart/form-data"))
+        mockMvc.perform(multipart("/api/auth/signup")
+                        .param("name", request.name())
+                        .param("username", request.username())
+                        .param("surname", request.surname())
+                        .param("password", request.password())
+                        .param("about", request.about())
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(expectedResponse));
     }
@@ -72,18 +78,22 @@ class AuthRestControllerTest {
     @DisplayName("Успешная попытка регистрации")
     public void signUp_WhenCorrectRequest_ThenSaveUserAndReturnOk() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
-        SignUpRequest request = new SignUpRequest("user", "123", "123", "123", "123", null);
+        SignUpRequest request = new SignUpRequest("User", "Userr123", "123", "123", "123", null);
         User savedUser = new User();
         savedUser.setId(1L);
-        savedUser.setUsername("user");
+        savedUser.setUsername("User");
         savedUser.setEncryptedPassword("fdk34f76ads2f5n12mr");
         when(userService.saveUser(any(SignUpRequest.class))).thenReturn(savedUser);
         String expectedResponse = mapper.writeValueAsString(
                 new SignUpResponse("Пользователь зарегистрирован", savedUser.getId(), savedUser.getUsername()));
 
-        mockMvc.perform(post("/api/auth/signup")
-                        .contentType("multipart/form-data")
-                        .content(mapper.writeValueAsBytes(request)))
+        mockMvc.perform(multipart("/api/auth/signup")
+                        .param("name", request.name())
+                        .param("username", request.username())
+                        .param("surname", request.surname())
+                        .param("password", request.password())
+                        .param("about", request.about())
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isCreated())
                 .andExpect(content().json(expectedResponse));
     }
@@ -95,7 +105,7 @@ class AuthRestControllerTest {
         when(authService.authenticate(any(SignInRequest.class))).thenAnswer(ans -> {
             throw new BadCredentialsException("Пользователь с таким именем не найден!");
         });
-        SignInRequest request = new SignInRequest("user", "123");
+        SignInRequest request = new SignInRequest("User", "Userr123");
         String expectedResponse = mapper.writeValueAsString(new ApiErrorResponse(
                 "Пользователь с таким именем не найден!",
                 "400",
@@ -116,7 +126,7 @@ class AuthRestControllerTest {
         when(authService.authenticate(any(SignInRequest.class))).thenAnswer(ans -> {
             throw new BadCredentialsException("Неправильный пароль!");
         });
-        SignInRequest request = new SignInRequest("user", "321");
+        SignInRequest request = new SignInRequest("User", "Userr321");
         String expectedResponse = mapper.writeValueAsString(
                 new ApiErrorResponse("Неправильный пароль!", "400", "BadCredentialsException", "Неправильный пароль!"));
 
@@ -133,7 +143,7 @@ class AuthRestControllerTest {
         ObjectMapper mapper = new ObjectMapper();
         String jwt = "123abcdef";
         when(authService.authenticate(any(SignInRequest.class))).thenReturn(jwt);
-        SignInRequest request = new SignInRequest("user", "321");
+        SignInRequest request = new SignInRequest("User", "Userr321");
 
         mockMvc.perform(post("/api/auth/signin")
                         .contentType("application/json")

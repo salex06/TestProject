@@ -1,6 +1,7 @@
 package salex.messenger.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,9 +20,11 @@ public class Contact {
 
     @ManyToOne
     @JoinColumn(name = "owner_id", referencedColumnName = "id")
+    @NotNull
     private User owner;
 
     @ManyToOne
     @JoinColumn(name = "contact_id", referencedColumnName = "id")
+    @NotNull
     private User contact;
 }

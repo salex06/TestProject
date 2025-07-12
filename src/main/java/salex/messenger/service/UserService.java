@@ -39,7 +39,7 @@ public class UserService {
         }
 
         String filename = null;
-        if (!signUpRequest.photo().isEmpty()) {
+        if (signUpRequest.photo() != null && !signUpRequest.photo().isEmpty()) {
             imageStorageService.validateImageFile(signUpRequest.photo());
             filename = imageStorageService.store(
                     signUpRequest.photo(),

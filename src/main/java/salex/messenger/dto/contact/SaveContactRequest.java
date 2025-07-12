@@ -1,3 +1,5 @@
 package salex.messenger.dto.contact;
 
-public record SaveContactRequest(String owner, String contact) {}
+import jakarta.validation.constraints.NotBlank;
+
+public record SaveContactRequest(@NotBlank String owner, @NotBlank String contact) {}

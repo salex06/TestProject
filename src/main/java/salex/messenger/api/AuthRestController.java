@@ -2,6 +2,7 @@ package salex.messenger.api;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -24,7 +25,7 @@ public class AuthRestController {
     private final AuthService authService;
 
     @PostMapping(value = "/signup", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> signUp(@ModelAttribute SignUpRequest signUpRequest) {
+    public ResponseEntity<?> signUp(@Valid @ModelAttribute SignUpRequest signUpRequest) {
         User user = userService.saveUser(signUpRequest);
 
         return new ResponseEntity<>(
@@ -33,7 +34,7 @@ public class AuthRestController {
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<?> signIn(@RequestBody SignInRequest signInRequest, HttpServletResponse response) {
+    public ResponseEntity<?> signIn(@Valid @RequestBody SignInRequest signInRequest, HttpServletResponse response) {
         String jwt = authService.authenticate(signInRequest);
         Cookie cookie = new Cookie("jwt", jwt);
         cookie.setHttpOnly(true);

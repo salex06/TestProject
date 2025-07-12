@@ -1,3 +1,5 @@
 package salex.messenger.dto.users;
 
-public record AccountInfo(String username, String name, String surname, String photoPath, String about) {}
+import jakarta.validation.constraints.NotBlank;
+
+public record AccountInfo(@NotBlank String username, String name, String surname, String photoPath, String about) {}

@@ -2,6 +2,8 @@ package salex.messenger.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import java.util.Collection;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -25,6 +27,8 @@ public class User implements UserDetails {
 
     @NotBlank
     @Column(name = "username", unique = true, nullable = false)
+    @Size(min = 3, max = 20, message = "Имя не должно быть меньше 3 символов или больше 20 символов")
+    @Pattern(regexp = "[a-zA-Z0-9]+", message = "Имя может состоять только из цифр или лат. символов")
     private String username;
 
     @NotBlank
