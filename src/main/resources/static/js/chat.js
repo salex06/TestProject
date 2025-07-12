@@ -92,23 +92,6 @@ function sendMessage(e){
     addMessageToChat(message);
 }
 
-async function getUsername(){
-    const response = await fetch('/api/account/username', {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-            'Accept': 'application/json'
-        }
-    });
-
-    if(response.status == 401){
-        window.location.href = "/signin";
-    }
-
-    let data = await response.json();
-    return data.username;
-}
-
 async function loadChats(username){
     const response = await fetch('/api/chat/list?current=' + username, {
         method: 'GET',
@@ -119,7 +102,7 @@ async function loadChats(username){
     });
 
     if(response.status == 401){
-        window.location.href = '/signin';
+        redirectToLogin();
     }
     if(!response.ok){
         return;
@@ -157,7 +140,7 @@ document.getElementById('chat-list').addEventListener('click', async (event) => 
 
     if (clickedItem) {
         if(selectedUser){
-            document.querySelector(`[data-username="${selectedUser}"]`).className = "chat-item";
+            document.querySelector(`[data-username="${selectedUser}"]`).classList.remove("active");
         }
         clickedItem.className = "chat-item active";
         const name = clickedItem.dataset.username;
@@ -172,7 +155,7 @@ document.getElementById('chat-list').addEventListener('click', async (event) => 
         });
 
         if(historyResponse.status == 401){
-            window.location.href = "/signin";
+            redirectToLogin();
         }
 
         const currentChatUser = document.getElementById('current-chat-user');
@@ -197,8 +180,6 @@ document.getElementById('chat-list').addEventListener('click', async (event) => 
                 addMessageToChat(i);
             }
         }
-
-
     }
 });
 
@@ -238,6 +219,7 @@ document.getElementById('close-chat').addEventListener('click', (e) => {
         document.getElementById('chat-sidebar').style.display = 'flex';
         document.getElementById('chat-main').style.display = "none";
         document.getElementById('close-chat').classList.add('hidden');
+
         if(selectedUser){
             document.querySelector(`[data-username="${selectedUser}"]`).className = "chat-item";
         }

@@ -21,19 +21,6 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 
         window.location.href = `/account`;
     } catch (error) {
-        showPopup(error.message || 'Login failed', 'error');
+        showPopup(error.message || 'Не удалось войти', 'error');
     }
 });
-
-function showPopup(message, type) {
-    const popup = document.createElement('div');
-    popup.className = `popup ${type}`;
-    popup.textContent = message;
-
-    document.body.appendChild(popup);
-
-    setTimeout(() => {
-        popup.classList.add('fade-out');
-        popup.addEventListener('animationend', () => popup.remove());
-    }, 3000);
-}

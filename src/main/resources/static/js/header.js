@@ -1,88 +1,53 @@
-document.addEventListener('DOMContentLoaded', loadInfoFromServer);
-
-document.addEventListener("avatarWasChanged", function(event) {
-    loadInfoFromServer();
+//Обработчик загрузки страницы
+document.addEventListener('DOMContentLoaded', async (e) => {
+    updateHeaderInfo();
 });
 
-document.getElementById('header-avatar').addEventListener("click", (e) => {
-    window.location.href = "/account";
+//Обработчик события обновления фото пользователя
+document.addEventListener("avatarWasChanged", async (e) => {
+    updateHeaderInfo();
+});
+
+async function updateHeaderInfo(){
+    const data = await getUserInfo();
+
+    const headerUsername = document.getElementById('header-username');
+    if (headerUsername) {
+        headerUsername.textContent = `${data.username}`;
+    }
+
+    const headerAvatar = document.getElementById('header-avatar');
+    if(headerAvatar){
+        headerAvatar.src = `/images/${data.photoPath || 'no_img.jpg'}`;
+    }
+}
+
+//Обработчик нажатия на информационное поле header - переход в аккаунт
+document.querySelector('.header-right').addEventListener("click", (e) => {
+    redirectToAccount();
 })
 
-document.getElementById('header-username').addEventListener("click", (e) => {
-    window.location.href = "/account";
-})
+//Обработчик нажатия на кнопку выхода из аккаунта
+document.getElementById('headerLogoutBtn').addEventListener('click', quit);
 
-async function loadInfoFromServer() {
-    try {
-        const response = await fetch('/api/account', {
-            method: 'GET',
-            credentials: 'include',
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
-
-        if (response.status === 401 || response.status === 403) {
-            throw new Error('Требуется авторизация');
-        }
-
-        if (!response.ok) {
-            throw new Error('Ошибка при загрузке данных');
-        }
-
-        const userData = await response.json();
-        updateHeaderInfo(userData);
-    } catch (error) {
-        console.error('Ошибка:', error.message);
-        redirectToLogin();
-    }
-}
-
-function updateHeaderInfo(data) {
-    const greetingElement = document.getElementById('header-username');
-    if (greetingElement) {
-        greetingElement.textContent = `${data.username}`;
-    }
-
-    loadUserAvatarForHeader(data.photoPath);
-}
-
-async function loadUserAvatarForHeader(filename) {
-    try {
-        const response = await fetch(`/api/images/${filename}`, {
-            method: 'GET',
-            credentials: 'include',
-        });
-        if (response.ok) {
-            const blob = await response.blob();
-            const imageUrl = URL.createObjectURL(blob);
-            document.getElementById('header-avatar').src = imageUrl;
-        }
-    } catch (error) {
-        console.error('Ошибка загрузки аватара:', error);
-    }
-}
-
-//Поиск пользователей
-let currentPage = 0;
-const pageSize = 5;
-let isLoading = false;
-const searchInput = document.getElementById('global-search');
 const dropdownList = document.getElementById('search-results');
-
+//Обработчик нажатия на запись с найденным пользователем
 dropdownList.addEventListener('click', (event) => {
     const clickedItem = event.target.closest('.search-result-item');
 
     if (clickedItem) {
-        const name = clickedItem.dataset.username; // Получаем data-name
-        window.location.href = `/profile/${name}`;
+        const name = clickedItem.dataset.username;
+        redirectToProfile(name);
     }
 });
 
+const searchInput = document.getElementById('global-search');
 let debounceTimer;
+//Обработчик ввода данных в строку поиска пользователей
 searchInput.addEventListener('input', () => {
-    clearTimeout(debounceTimer);
     dropdownList.style.display = "none";
+
+    clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
         if (searchInput.value.length > 2) {
             currentPage = 0;
@@ -95,17 +60,26 @@ searchInput.addEventListener('input', () => {
     }, 300);
 });
 
+const pageSize = 5;
+let currentPage = 0;
+let isLoading = false;
 async function fetchSuggestions(query) {
     if (isLoading) return; // Не вызывать новый запрос, пока идёт текущий
     isLoading = true;
 
     try {
-        const response = await fetch(`/api/users/search?query=${encodeURIComponent(query)}&page=${currentPage}&size=${pageSize}`);
-        if(response.status == '401'){
+        const response = await fetch(
+            `/api/users/search?query=${encodeURIComponent(query)}&page=${currentPage}&size=${pageSize}`
+        );
+
+        if(response.status == 401){
             redirectToLogin();
         }
-        const data = await response.json();
+        if(!response.ok){
+            throw new Error("Ошибка поиска");
+        }
 
+        const data = await response.json();
         if(data.content.length == 0 && currentPage == 0){
             dropdownList.innerHTML = `
                <div class="search-result-item">
@@ -125,8 +99,10 @@ async function fetchSuggestions(query) {
                 </div>`;
         });
 
+        //Увеличиваем номер страницы
         currentPage++;
 
+        //Если страница последняя - останавливаем механизм пагинации
         if (currentPage >= data.totalPages) {
             dropdownList.removeEventListener('scroll', handleScroll);
         }
@@ -150,22 +126,3 @@ function handleScroll() {
     }
 }
 
-//Выход из аккаунта
-async function quit() {
-    const response = await fetch('/api/account/quit', {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-            'Accept': 'application/json'
-        }
-    });
-
-    if(response.ok){
-        redirectToLogin();
-    }
-}
-document.getElementById('headerLogoutBtn').addEventListener('click', quit);
-
-function redirectToLogin() {
-    window.location.href = '/signin';
-}

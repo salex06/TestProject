@@ -1,28 +1,7 @@
 //Получение информации о профиле при загрузке страницы
 document.addEventListener('DOMContentLoaded', async () => {
-    try {
-        const response = await fetch('/api/account', {
-            method: 'GET',
-            credentials: 'include',
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
-
-        if (response.status === 401 || response.status === 403) {
-            throw new Error('Требуется авторизация');
-        }
-
-        if (!response.ok) {
-            throw new Error('Ошибка при загрузке данных');
-        }
-
-        const userData = await response.json();
-        updateUserInfo(userData);
-    } catch (error) {
-        console.error('Ошибка:', error.message);
-        redirectToLogin();
-    }
+    let data = await getUserInfo();
+    updateUserInfo(data);
 });
 
 //Обновление информации профиля
@@ -47,49 +26,16 @@ function updateUserInfo(data) {
         about.textContent = `${data.about}`;
     }
 
-    loadUserAvatar(data.photoPath);
-}
+    const photo = document.getElementById('avatar-preview');
+    if(photo){
+        photo.src = `/images/${data.photoPath || 'no_img.jpg'}`;
 
-//Загрузка фото профиля
-async function loadUserAvatar(filename) {
-    try {
-        const response = await fetch(`/api/images/${filename}`, {
-            method: 'GET',
-            credentials: 'include',
-        });
-        if (response.ok) {
-            const blob = await response.blob();
-            const imageUrl = URL.createObjectURL(blob);
-            document.getElementById('avatar-preview').src = imageUrl;
-
-            let event = new Event("avatarWasChanged", {bubbles: true});
-            document.dispatchEvent(event);
-        }
-    } catch (error) {
-        console.error('Ошибка загрузки аватара:', error);
+        let event = new Event("avatarWasChanged", {bubbles: true});
+        document.dispatchEvent(event);
     }
 }
 
-//Выход из аккаунта
-async function quit() {
-    const response = await fetch('/api/account/quit', {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-            'Accept': 'application/json'
-        }
-    });
-
-    if(response.ok){
-        redirectToLogin();
-    }
-}
 document.getElementById('logoutBtn').addEventListener('click', quit);
-document.getElementById('headerLogoutBtn').addEventListener('click', quit);
-
-function redirectToLogin() {
-    window.location.href = '/signin';
-}
 
 // Обработчик для кнопки редактирования имени
 document.querySelector('[data-field="first-name"]').addEventListener('click', function() {
@@ -124,9 +70,15 @@ function openNameModal(currentData, modalName, inputName, errorName) {
 }
 
 // Закрытие модального окна
-document.querySelector('.close').addEventListener('click', function() {
+document.getElementById('closeNameModal').addEventListener('click', function() {
     document.getElementById('nameModal').style.display = 'none';
+});
+
+document.getElementById('closeSurnameModal').addEventListener('click', function() {
     document.getElementById('surnameModal').style.display = 'none';
+});
+
+document.getElementById('closeAboutModal').addEventListener('click', function() {
     document.getElementById('aboutModal').style.display = 'none';
 });
 
@@ -189,7 +141,7 @@ document.getElementById('avatar-upload').addEventListener('change', function(e) 
     uploadAvatar(file);
 });
 
-// Функция отправки PATCH-запроса
+// Функции отправки PATCH-запросов
 async function updateUserName(newName) {
     const modal = document.getElementById('nameModal');
     const errorSpan = document.getElementById('nameError');
@@ -291,7 +243,9 @@ async function uploadAvatar(file) {
             showPopup('Аватар успешно обновлен', 'success');
 
             const data = await response.json();
-            loadUserAvatar(data.updatedPhoto);
+            document.getElementById('avatar-preview').src = `/images/${data.updatedPhoto || 'no_img.jpg'}`;
+            let event = new Event("avatarWasChanged", {bubbles: true});
+            document.dispatchEvent(event);
         } else {
             const error = await response.json();
             showPopup(error.message || 'Ошибка обновления', 'error');
@@ -300,18 +254,4 @@ async function uploadAvatar(file) {
         console.error('Ошибка загрузки:', err);
         showPopup('Ошибка сети', 'error');
     }
-}
-
-
-function showPopup(message, type) {
-    const popup = document.createElement('div');
-    popup.className = `popup ${type}`;
-    popup.textContent = message;
-
-    document.body.appendChild(popup);
-
-    setTimeout(() => {
-        popup.classList.add('fade-out');
-        popup.addEventListener('animationend', () => popup.remove());
-    }, 3000);
 }

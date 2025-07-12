@@ -1,26 +1,28 @@
 const contactsContainer = document.getElementById('contacts-list');
 document.addEventListener('DOMContentLoaded', async () => {
-    const response = await fetch('/api/contacts', {
-        method : 'GET',
-        credentials: 'include'
-    });
+    try{
+        const response = await fetch('/api/contacts', {
+            method : 'GET',
+            credentials: 'include'
+        });
 
-    if(response.status == 401){
-        redirectToLogin();
-    }
+        if(response.status == 401){
+            redirectToLogin();
+        }
 
-    if(response.ok){
+        if(!response.ok){
+            throw new Error(response);
+        }
+
         const data = await response.json();
         const contacts = data.contacts;
         for(let i of contacts){
             appendContact(i);
         }
+    }catch(error){
+        console.log(error);
     }
 });
-
-function redirectToLogin(){
-    window.location.href = '/signin';
-}
 
 function appendContact(contact){
     contactsContainer.innerHTML += `
@@ -46,18 +48,19 @@ function appendContact(contact){
     `;
 }
 
+//Обработчик нажатия на карточку контакта
 contactsContainer.addEventListener('click', (event) => {
     const isClickToProfile = event.target.closest('.contact-info');
 
     if (isClickToProfile) {
         const name = isClickToProfile.dataset.username;
-        window.location.href = `/profile/${name}`;
+        redirectToProfile(name);
     }
 
     const isClickToChat = event.target.closest('.btn-chat');
     if (isClickToChat) {
         const name = isClickToChat.dataset.username;
-        window.location.href = `/chats?receiverUsername=${name}`;
+        redirectToChatWithUser(name);
     }
 
     const isClickToRemoveContact = event.target.closest('.btn-delete');
@@ -70,41 +73,27 @@ contactsContainer.addEventListener('click', (event) => {
 });
 
 async function removeContact(username){
-    let ownerUsername = await getUsername();
-    const response = await fetch("/api/contacts", {
-        method: 'DELETE',
-        credentials: "include",
-        headers: {
-            "Accept" : "application/json",
-            "Content-Type" : "application/json"
-        },
-        body: JSON.stringify({
-              'owner' : ownerUsername,
-              'contact' : username
-        })
-    });
+    try{
+        let ownerUsername = await getUsername();
+        const response = await fetch("/api/contacts", {
+            method: 'DELETE',
+            credentials: "include",
+            headers: {
+                "Accept" : "application/json",
+                "Content-Type" : "application/json"
+            },
+            body: JSON.stringify({
+                  'owner' : ownerUsername,
+                  'contact' : username
+            })
+        });
 
-    if(response.status == 401){
-        window.location.href = "/signin";
-        return false;
-    }
-
-    return true;
-}
-
-async function getUsername(){
-    const response = await fetch('/api/account/username', {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-            'Accept': 'application/json'
+        if(response.status == 401){
+            redirectToLogin();
         }
-    });
 
-    if(response.status == 401){
-        window.location.href = "/signin";
+        return true;
+    }catch(error){
+        console.log(error);
     }
-
-    let data = await response.json();
-    return data.username;
 }

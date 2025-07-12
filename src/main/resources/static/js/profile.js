@@ -1,5 +1,6 @@
-//Получение информации о профиле при загрузке страницы
 const username = window.location.pathname.split('/profile/')[1];
+
+//Обработчик загрузки страницы
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         const response = await fetch(`/api/profile/${username}`, {
@@ -10,8 +11,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
 
-        if (response.status === 401 || response.status === 403) {
-            throw new Error('Требуется авторизация');
+        if (response.status === 401) {
+            redirectToLogin();
+        }else if(response.redirected){
+            redirectToAccount();
         }
 
         if (!response.ok) {
@@ -26,28 +29,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     } catch (error) {
         console.error('Ошибка:', error.message);
-        redirectToMainPage();
     }
 });
 
 async function isContact(username){
-    const response = await fetch(`/api/contacts/check?owner=${await getUsername()}&contact=${username}`, {
-        method: "GET",
-        credentials: "include",
-        headers : {
-            "Accept" : "application/json"
+    try{
+        const response = await fetch(`/api/contacts/check?owner=${await getUsername()}&contact=${username}`, {
+            method: "GET",
+            credentials: "include",
+            headers : {
+                "Accept" : "application/json"
+            }
+        });
+
+        if(response.status == 401){
+            redirectToLogin();
         }
-    });
+        if(!response.ok){
+            throw new Error('Ошибка получения данных');
+        }
 
-    if(response.status == 401){
-        window.location.href = "/signin";
-    }
+        const data = await response.text();
+        if(data == "true"){
+            return true;
+        }
 
-    const data = await response.text();
-    if(response.ok && data == "true"){
-        return true;
+        return false;
+    }catch (error) {
+       console.error('Ошибка:', error.message);
     }
-    return false;
 }
 
 //Загрузка информации о пользователе
@@ -72,104 +82,77 @@ function updateUserInfo(data) {
         about.textContent = `${data.about}`;
     }
 
-    if(data.photoPath)
-        loadUserAvatar(data.photoPath);
-}
-
-//Загрузка фото профиля
-async function loadUserAvatar(filename) {
-    try {
-        const response = await fetch(`/api/images/${filename}`, {
-            method: 'GET',
-            credentials: 'include',
-        });
-        if (response.ok) {
-            const blob = await response.blob();
-            const imageUrl = URL.createObjectURL(blob);
-            document.getElementById('avatar-preview').src = imageUrl;
-
-            let event = new Event("avatarWasChanged", {bubbles: true});
-            document.dispatchEvent(event);
-        }
-    } catch (error) {
-        console.error('Ошибка загрузки аватара:', error);
-    }
+    const photo = document.getElementById('avatar-preview');
+    if(photo)
+        photo.src = `/images/${data.photoPath || 'no_img.jpg'}`;
 }
 
 //Обработчик нажатия на кнопку перехода к чату
 document.getElementById("goToChatBtn").addEventListener("click", (e) => {
-    window.location.href = `/chats?receiverUsername=${username}`;
+    redirectToChatWithUser(username);
 });
 
 //Обработчик добавления пользователя в контакты
-document.getElementById("addToContactBtn").addEventListener("click", async (e) =>{
-    let ownerUsername = await getUsername();
-    const response = await fetch("/api/contacts", {
-        method: 'POST',
-        credentials: "include",
-        headers: {
-            "Accept" : "application/json",
-            "Content-Type" : "application/json"
-        },
-        body: JSON.stringify({
-              'owner' : ownerUsername,
-              'contact' : username
-        })
-    });
+document.getElementById("addToContactBtn").addEventListener("click", async (e) => {
+    try{
+        let ownerUsername = await getUsername();
+        const response = await fetch("/api/contacts", {
+            method: 'POST',
+            credentials: "include",
+            headers: {
+                "Accept" : "application/json",
+                "Content-Type" : "application/json"
+            },
+            body: JSON.stringify({
+                  'owner' : ownerUsername,
+                  'contact' : username
+            })
+        });
 
-    if(response.status == 401){
-        window.location.href = "/signin";
-    }
+        if(response.status == 401){
+            redirectToLogin();
+        }
 
-    if(response.ok){
+        if(!response.ok){
+            throw new Error("Ошибка при добавлении пользователя в контакты");
+        }
+
         document.getElementById('addToContactBtn').classList.add('hidden');
         document.getElementById('removeFromContactsBtn').classList.remove('hidden');
+    }catch(error){
+        console.log(error);
     }
 });
 
 //Обработчик удаления пользователя из контактов
 document.getElementById("removeFromContactsBtn").addEventListener("click", async (e) => {
-    let ownerUsername = await getUsername();
-    const response = await fetch("/api/contacts", {
-        method: 'DELETE',
-        credentials: "include",
-        headers: {
-            "Accept" : "application/json",
-            "Content-Type" : "application/json"
-        },
-        body: JSON.stringify({
-              'owner' : ownerUsername,
-              'contact' : username
-        })
-    });
+    try{
+        let ownerUsername = await getUsername();
+        const response = await fetch("/api/contacts", {
+            method: 'DELETE',
+            credentials: "include",
+            headers: {
+                "Accept" : "application/json",
+                "Content-Type" : "application/json"
+            },
+            body: JSON.stringify({
+                  'owner' : ownerUsername,
+                  'contact' : username
+            })
+        });
 
-    if(response.status == 401){
-        window.location.href = "/signin";
-    }
+        if(response.status == 401){
+            redirectToLogin();
+        }
 
-    if(response.ok){
+        if(!response.ok){
+            throw new Error("Ошибка при удалении пользователя из контактов");
+        }
+
         document.getElementById('addToContactBtn').classList.remove('hidden');
         document.getElementById('removeFromContactsBtn').classList.add('hidden');
+    }catch(error){
+        console.log(error);
     }
 });
 
-function redirectToMainPage() {
-    window.location.href = '/';
-}
-
-async function getUsername(){
-    const response = await fetch('/api/account/username', {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-            'Accept': 'application/json'
-        }
-    });
-
-    if(response.status == 401){
-        window.location.href = "/signin";
-    }
-
-    let data = await response.json();
-    return data.username;
-}
