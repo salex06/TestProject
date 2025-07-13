@@ -27,6 +27,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             data.createdAt = createdAt.getHours() + ":" + createdAt.getMinutes();
             if(selectedUser == data.senderUsername){
                 addMessageToChat(data);
+            }else{
+                addUnreadMessage(data);
             }
         });
     };
@@ -131,10 +133,89 @@ function appendChat(chatInfo){
             <div class="chat-info">
                <div class="chat-name">${chatInfo.username}</div>
             </div>
+            <div class="unread-messages-counter hidden" data-value=0>0</div>
         </div>`;
+
+    return chatContainer.querySelector(`.chat-item[data-username='${chatInfo.username}']`);
 }
 
-//Обработчик открытия чата
+function addMessageToChat(message){
+    let text = message.text;
+    let createdAt = message.createdAt;
+    let senderUsername = message.senderUsername;
+    let receiverUsername = message.receiverUsername;
+    if(senderUsername == selectedUser){
+        chatMessagesContainer.innerHTML += `
+            <div class="message received">
+                <div class="message-content">
+                    ${text}
+                </div>
+                <div class="message-time">${createdAt}</div>
+            </div>`;
+    }else{
+        chatMessagesContainer.innerHTML += `
+            <div class="message sent">
+                <div class="message-content">
+                    ${text}
+                </div>
+                <div class="message-time">${createdAt}</div>
+            </div>`;
+    }
+    chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+}
+
+async function addUnreadMessage(data){
+    const senderUsername = data.senderUsername;
+    let chatItem = chatContainer.querySelector(`[data-username=${senderUsername}]`);
+    if(!chatItem){
+        let chatInfo = await getChatPartnerInfo(senderUsername);
+        chatItem = appendChat(chatInfo);
+    }
+    updateMsgCounter(chatItem);
+}
+
+function updateMsgCounter(chatItem){
+    let unreadMessageCounter = chatItem.querySelector('.unread-messages-counter');
+    unreadMessageCounter.classList.remove('hidden');
+    let val = +unreadMessageCounter.dataset.value;
+    val += 1;
+    if(val > 99){
+        unreadMessageCounter.innerHTML = '+99';
+    }else{
+        unreadMessageCounter.innerHTML = val;
+    }
+    unreadMessageCounter.dataset.value = val;
+}
+
+async function getChatPartnerInfo(username){
+    try{
+        let response = await fetch(`/api/chat/user?username=${username}`, {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                "Accept" : "application/json"
+            }
+        });
+
+        if(response.status == 401){
+            redirectToLogin();
+        }
+        if(!response.ok){
+            throw new Error(response);
+        }
+
+        return await response.json();
+    }catch(error){
+        console.log(error);
+    }
+}
+
+document.addEventListener('keyup', function(event) {
+  if (event.code == 'NumpadEnter') {
+    sendMessage(event);
+  }
+});
+
 document.getElementById('chat-list').addEventListener('click', async (event) => {
     const clickedItem = event.target.closest('.chat-item');
 
@@ -145,6 +226,10 @@ document.getElementById('chat-list').addEventListener('click', async (event) => 
         clickedItem.className = "chat-item active";
         const name = clickedItem.dataset.username;
         selectedUser = name;
+
+        let unreadMessageCounter = clickedItem.querySelector('.unread-messages-counter');
+        unreadMessageCounter.dataset.value = 0;
+        unreadMessageCounter.classList.add('hidden');
 
         const historyResponse = await fetch(`/api/chat/history?first=${await getUsername()}&second=${name}`, {
             method: 'GET',
@@ -181,37 +266,6 @@ document.getElementById('chat-list').addEventListener('click', async (event) => 
             }
         }
     }
-});
-
-function addMessageToChat(message){
-    let text = message.text;
-    let createdAt = message.createdAt;
-    let senderUsername = message.senderUsername;
-    let receiverUsername = message.receiverUsername;
-    if(senderUsername == selectedUser){
-        chatMessagesContainer.innerHTML += `
-            <div class="message received">
-                <div class="message-content">
-                    ${text}
-                </div>
-                <div class="message-time">${createdAt}</div>
-            </div>`;
-    }else{
-        chatMessagesContainer.innerHTML += `
-            <div class="message sent">
-                <div class="message-content">
-                    ${text}
-                </div>
-                <div class="message-time">${createdAt}</div>
-            </div>`;
-    }
-    chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
-}
-
-document.addEventListener('keyup', function(event) {
-  if (event.code == 'NumpadEnter') {
-    sendMessage(event);
-  }
 });
 
 document.getElementById('close-chat').addEventListener('click', (e) => {

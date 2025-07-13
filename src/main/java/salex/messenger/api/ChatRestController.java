@@ -13,13 +13,16 @@ import salex.messenger.dto.chat.user.ChatPartnerInfo;
 import salex.messenger.dto.chat.user.ChatPartnersResponse;
 import salex.messenger.entity.Message;
 import salex.messenger.entity.User;
+import salex.messenger.exception.UserNotFoundException;
 import salex.messenger.service.MessageService;
+import salex.messenger.service.UserService;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/chat")
 public class ChatRestController {
     private final MessageService messageService;
+    private final UserService userService;
 
     @GetMapping("/history")
     public ResponseEntity<?> getChatHistory(
@@ -59,6 +62,19 @@ public class ChatRestController {
                                 .toList(),
                         chatPartners.size()),
                 HttpStatus.OK);
+    }
+
+    @GetMapping("/user")
+    public ResponseEntity<?> getChatPartnerInfo(@RequestParam String username, Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        User user = userService
+                .findUser(username)
+                .orElseThrow(() -> new UserNotFoundException("Пользователь '" + username + "' не найден"));
+
+        return new ResponseEntity<>(convertToChatPartnerInfo(user), HttpStatus.OK);
     }
 
     @DeleteMapping("")
