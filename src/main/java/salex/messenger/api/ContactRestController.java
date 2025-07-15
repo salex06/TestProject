@@ -27,7 +27,7 @@ public class ContactRestController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        List<Contact> contacts = contactService.getContacts(principal.getName());
+        List<Contact> contacts = contactService.getAllContactsByUsername(principal.getName());
 
         return new ResponseEntity<>(
                 new ContactListResponse(
@@ -71,14 +71,12 @@ public class ContactRestController {
 
     @GetMapping("/check")
     public ResponseEntity<?> checkExistsContact(
-            @RequestParam(name = "owner") String ownerUsername,
-            @RequestParam(name = "contact") String contactUsername,
-            Principal principal) {
+            @RequestParam(name = "contact") String contactUsername, Principal principal) {
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        boolean result = contactService.existsByUsernames(ownerUsername, contactUsername);
+        boolean result = contactService.existsByUsernames(principal.getName(), contactUsername);
 
         return ResponseEntity.ok(result);
     }

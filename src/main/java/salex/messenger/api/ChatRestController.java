@@ -2,7 +2,6 @@ package salex.messenger.api;
 
 import java.security.Principal;
 import java.util.List;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,18 +24,12 @@ public class ChatRestController {
     private final UserService userService;
 
     @GetMapping("/history")
-    public ResponseEntity<?> getChatHistory(
-            @RequestParam("first") String firstUsername,
-            @RequestParam("second") String secondUsername,
-            Principal principal) {
+    public ResponseEntity<?> getChatHistory(@RequestParam("username") String chatPartnerUsername, Principal principal) {
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        if (!Objects.equals(principal.getName(), firstUsername)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
 
-        List<Message> history = messageService.getChatHistory(firstUsername, secondUsername);
+        List<Message> history = messageService.getChatHistory(principal.getName(), chatPartnerUsername);
 
         return new ResponseEntity<>(
                 new ChatHistoryResponse(
@@ -45,15 +38,12 @@ public class ChatRestController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<?> getChatPartners(@RequestParam("current") String currentUser, Principal principal) {
+    public ResponseEntity<?> getChatPartners(Principal principal) {
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        if (!Objects.equals(principal.getName(), currentUser)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
 
-        List<User> chatPartners = messageService.findChatPartners(currentUser);
+        List<User> chatPartners = messageService.findChatPartners(principal.getName());
 
         return new ResponseEntity<>(
                 new ChatPartnersResponse(

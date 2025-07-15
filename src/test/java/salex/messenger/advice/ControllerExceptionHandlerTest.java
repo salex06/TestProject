@@ -1,8 +1,7 @@
 package salex.messenger.advice;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -20,6 +19,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.util.FileCopyUtils;
+import salex.messenger.dto.contact.SaveContactRequest;
 import salex.messenger.dto.error.ApiErrorResponse;
 
 @SpringBootTest
@@ -68,5 +68,17 @@ class ControllerExceptionHandlerTest {
         mockMvc.perform(get("/example/"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(new String(bytes, StandardCharsets.UTF_8)));
+    }
+
+    @Test
+    @DisplayName("Переданы некорректные параметры в запросе (не прошли валидацию)")
+    public void whenMethodArgumentNotValidException_ThenReturnApiErrorResponse() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        SaveContactRequest invalidRequest = new SaveContactRequest("", "");
+
+        mockMvc.perform(post("/api/contacts")
+                        .content(mapper.writeValueAsString(invalidRequest))
+                        .contentType("application/json"))
+                .andExpect(status().isBadRequest());
     }
 }

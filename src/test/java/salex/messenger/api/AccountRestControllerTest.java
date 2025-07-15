@@ -28,6 +28,7 @@ import salex.messenger.dto.account.update.surname.UpdateSurnameRequest;
 import salex.messenger.dto.account.update.surname.UpdateSurnameResponse;
 import salex.messenger.dto.error.ApiErrorResponse;
 import salex.messenger.dto.users.AccountInfo;
+import salex.messenger.dto.users.UsernameResponse;
 import salex.messenger.entity.User;
 import salex.messenger.exception.UserNotFoundException;
 import salex.messenger.service.UserService;
@@ -309,5 +310,23 @@ class AccountRestControllerTest {
                 }))
                 .andExpect(status().isOk())
                 .andExpect(content().json(new ObjectMapper().writeValueAsString(response)));
+    }
+
+    @Test
+    @DisplayName("Неудачное получение username - пользователь не авторизован")
+    public void getUsername_WhenUnauthorized_ThenReturn401() throws Exception {
+        mockMvc.perform(get("/api/account/username")).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("Успешный запрос на получение username")
+    @WithMockUser("user")
+    public void getUsername_WhenAuthorized_ThenReturnUsername() throws Exception {
+        String username = "user";
+        UsernameResponse expected = new UsernameResponse(username);
+
+        mockMvc.perform(get("/api/account/username"))
+                .andExpect(status().isOk())
+                .andExpect(content().json(new ObjectMapper().writeValueAsString(expected)));
     }
 }

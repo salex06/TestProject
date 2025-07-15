@@ -95,7 +95,7 @@ function sendMessage(e){
 }
 
 async function loadChats(username){
-    const response = await fetch('/api/chat/list?current=' + username, {
+    const response = await fetch('/api/chat/list', {
         method: 'GET',
         credentials: 'include',
         headers: {
@@ -231,7 +231,7 @@ document.getElementById('chat-list').addEventListener('click', async (event) => 
         unreadMessageCounter.dataset.value = 0;
         unreadMessageCounter.classList.add('hidden');
 
-        const historyResponse = await fetch(`/api/chat/history?first=${await getUsername()}&second=${name}`, {
+        const historyResponse = await fetch(`/api/chat/history?username=${name}`, {
             method: 'GET',
             credentials: 'include',
             headers: {

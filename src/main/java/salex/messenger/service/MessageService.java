@@ -40,11 +40,11 @@ public class MessageService {
         User sender = userRepository
                 .findByUsername(senderUsername)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь '" + senderUsername + "' не найден"));
-        User reciever = userRepository
+        User receiver = userRepository
                 .findByUsername(receiverUsername)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь '" + receiverUsername + "' не найден"));
 
-        Message message = new Message(null, simpleMessage.text(), LocalDateTime.now(), sender, reciever);
+        Message message = new Message(null, simpleMessage.text(), LocalDateTime.now(), sender, receiver);
 
         return messageRepository.save(message);
     }

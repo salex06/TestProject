@@ -57,12 +57,4 @@ public class ContactService {
 
         return contactRepository.existsContact(ownerUser.getId(), contactUser.getId()) != null;
     }
-
-    public List<Contact> getContacts(String username) {
-        User user = userRepository
-                .findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь '" + username + "' не найден"));
-
-        return contactRepository.getAllContactsByOwnerId(user.getId());
-    }
 }
