@@ -1,9 +1,8 @@
 package salex.messenger.api;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static salex.messenger.entity.MessageStatus.SENT;
@@ -26,6 +25,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import salex.messenger.dto.chat.messages.ChatHistoryResponse;
 import salex.messenger.dto.chat.messages.MessageInfo;
+import salex.messenger.dto.chat.messages.UnreadMessageCountResponse;
 import salex.messenger.dto.chat.user.ChatPartnerInfo;
 import salex.messenger.dto.chat.user.ChatPartnersResponse;
 import salex.messenger.dto.error.ApiErrorResponse;
@@ -167,5 +167,48 @@ class ChatRestControllerTest {
         String secondUsername = "user2";
 
         mockMvc.perform(delete("/api/chat").param("second", secondUsername)).andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Неудачный запрос получения количества непрочитанных сообщений: пользователь не авторизован")
+    public void getUnreadMessageCount_WhenUnauthorized_ThenReturn401() throws Exception {
+        mockMvc.perform(get("/api/chat/history/unread/count").param("username", "user"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("Успешный запрос получения количества прочитанных сообщений")
+    @WithMockUser("user")
+    public void getUnreadMessageCount_WhenCorrectRequest_ThenReturnCount() throws Exception {
+        String username = "user";
+        String chatPartnerUsername = "alex";
+        int expectedAns = 5;
+        when(messageService.getUnreadMessageCount(username, chatPartnerUsername))
+                .thenReturn(expectedAns);
+        UnreadMessageCountResponse response = new UnreadMessageCountResponse(expectedAns);
+
+        mockMvc.perform(get("/api/chat/history/unread/count").param("username", chatPartnerUsername))
+                .andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(response)));
+    }
+
+    @Test
+    @DisplayName("Неудачный запрос на обновление состояния сообщений: пользователь не авторизован")
+    public void markAllMessagesAsRead_WhenUnauthorized_ThenReturn401() throws Exception {
+        mockMvc.perform(patch("/api/chat/history/mark/read").param("username", "username"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("Успешный запрос на обновление состояния сообщений")
+    @WithMockUser("user")
+    public void markAllMessagesAsRead_WhenCorrectRequest_ThenUpdateMessageStatus() throws Exception {
+        String username = "user";
+        String chatPartnerUsername = "alex";
+
+        mockMvc.perform(patch("/api/chat/history/mark/read").param("username", chatPartnerUsername))
+                .andExpect(status().isOk());
+
+        verify(messageService, times(1)).markAllMessagesAsRead(username, chatPartnerUsername);
     }
 }

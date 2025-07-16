@@ -188,4 +188,85 @@ class MessageServiceTest {
 
         verify(messageRepository, times(1)).removeChat(alice.getId(), alex.getId());
     }
+
+    @Test
+    @DisplayName("Неудачная попытка получения количества непрочитанных сообщений: user1 не найден")
+    public void getUnreadMessageCount_WhenFirstUserNotFound_ThenThrowException() {
+        String firstUsername = "alice";
+        String secondUsername = "alex";
+        when(userRepository.findByUsername(firstUsername)).thenReturn(Optional.empty());
+
+        assertThrows(
+                UserNotFoundException.class, () -> messageService.getUnreadMessageCount(firstUsername, secondUsername));
+    }
+
+    @Test
+    @DisplayName("Неудачная попытка получения количества непрочитанных сообщений: user2 не найден")
+    public void getUnreadMessageCount_WhenSecondUserNotFound_ThenThrowException() {
+        String firstUsername = "alice";
+        User alice = new User(2L, firstUsername, "123", "", "", "", "");
+        String secondUsername = "alex";
+        when(userRepository.findByUsername(firstUsername)).thenReturn(Optional.of(alice));
+        when(userRepository.findByUsername(secondUsername)).thenReturn(Optional.empty());
+
+        assertThrows(
+                UserNotFoundException.class, () -> messageService.getUnreadMessageCount(firstUsername, secondUsername));
+    }
+
+    @Test
+    @DisplayName("Успешная попытка получения количества непрочитанных сообщений")
+    public void getUnreadMessageCount_WhenCorrectUsername_ThenReturnMessageCount() {
+        String firstUsername = "alice";
+        User alice = new User(2L, firstUsername, "123", "", "", "", "");
+        String secondUsername = "alex";
+        User alex = new User(1L, secondUsername, "123", "", "", "", "");
+        when(userRepository.findByUsername(firstUsername)).thenReturn(Optional.of(alice));
+        when(userRepository.findByUsername(secondUsername)).thenReturn(Optional.of(alex));
+        int expected = 5;
+        when(messageRepository.getUnreadMessageCount(alice.getId(), alex.getId()))
+                .thenReturn(expected);
+
+        int actual = messageService.getUnreadMessageCount(firstUsername, secondUsername);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    @DisplayName("Неудачная попытка изменения статуса сообщений: user1 не найден")
+    public void markAllMessagesAsRead_WhenFirstUserNotFound_ThenThrowException() {
+        String firstUsername = "alice";
+        String secondUsername = "alex";
+        when(userRepository.findByUsername(firstUsername)).thenReturn(Optional.empty());
+
+        assertThrows(
+                UserNotFoundException.class, () -> messageService.markAllMessagesAsRead(firstUsername, secondUsername));
+    }
+
+    @Test
+    @DisplayName("Неудачная попытка изменения статуса сообщений: user2 не найден")
+    public void markAllMessagesAsRead_WhenSecondUserNotFound_ThenThrowException() {
+        String firstUsername = "alice";
+        User alice = new User(2L, firstUsername, "123", "", "", "", "");
+        String secondUsername = "alex";
+        when(userRepository.findByUsername(firstUsername)).thenReturn(Optional.of(alice));
+        when(userRepository.findByUsername(secondUsername)).thenReturn(Optional.empty());
+
+        assertThrows(
+                UserNotFoundException.class, () -> messageService.markAllMessagesAsRead(firstUsername, secondUsername));
+    }
+
+    @Test
+    @DisplayName("Успешная попытка изменения статуса сообщений")
+    public void markAllMessagesAsRead_WhenCorrectUsername_ThenUpdateStatus() {
+        String firstUsername = "alice";
+        User alice = new User(2L, firstUsername, "123", "", "", "", "");
+        String secondUsername = "alex";
+        User alex = new User(1L, secondUsername, "123", "", "", "", "");
+        when(userRepository.findByUsername(firstUsername)).thenReturn(Optional.of(alice));
+        when(userRepository.findByUsername(secondUsername)).thenReturn(Optional.of(alex));
+
+        messageService.markAllMessagesAsRead(firstUsername, secondUsername);
+
+        verify(messageRepository, times(1)).markAllMessagesAsReadByReceiverAndSender(alice.getId(), alex.getId());
+    }
 }
