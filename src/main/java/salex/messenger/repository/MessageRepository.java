@@ -42,4 +42,24 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
             WHERE (m.sender.id = :id1 AND m.receiver.id = :id2) OR (m.sender.id = :id2 AND m.receiver.id = :id1)
             """)
     void removeChat(@Param("id1") Long firstId, @Param("id2") Long secondId);
+
+    // Получить количество непрочитанных сообщений
+    @Transactional
+    @Query(
+            """
+            SELECT COUNT(*)
+            FROM Message m
+            WHERE m.status = salex.messenger.entity.MessageStatus.SENT AND m.receiver.id = :id1 AND m.sender.id = :id2
+            """)
+    int getUnreadMessageCount(@Param("id1") Long receiverId, @Param("id2") Long senderId);
+
+    @Transactional
+    @Modifying
+    @Query(
+            """
+            UPDATE Message m
+            SET m.status = salex.messenger.entity.MessageStatus.RECEIVED
+            WHERE m.receiver.id = :id1 AND m.sender.id = :id2
+            """)
+    void markAllMessagesAsReadByReceiverAndSender(@Param("id1") Long receiverId, @Param("id2") Long senderId);
 }

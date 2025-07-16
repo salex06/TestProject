@@ -2,10 +2,12 @@ package salex.messenger.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import salex.messenger.dto.chat.messages.SimpleMessage;
 import salex.messenger.entity.Message;
+import salex.messenger.entity.MessageStatus;
 import salex.messenger.entity.User;
 import salex.messenger.exception.UserNotFoundException;
 import salex.messenger.repository.MessageRepository;
@@ -33,7 +35,17 @@ public class MessageService {
                 .findByUsername(secondUsername)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь '" + secondUsername + "' не найден"));
 
-        return messageRepository.getChatHistory(first.getId(), second.getId());
+        List<Message> messages = messageRepository.getChatHistory(first.getId(), second.getId());
+
+        return messages.stream()
+                .map(msg -> {
+                    if (Objects.equals(msg.getReceiver().getUsername(), first.getUsername())) {
+                        msg.setStatus(MessageStatus.RECEIVED);
+                        return messageRepository.save(msg);
+                    }
+                    return msg;
+                })
+                .toList();
     }
 
     public Message saveMessage(String senderUsername, String receiverUsername, SimpleMessage simpleMessage) {
@@ -44,7 +56,8 @@ public class MessageService {
                 .findByUsername(receiverUsername)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь '" + receiverUsername + "' не найден"));
 
-        Message message = new Message(null, simpleMessage.text(), LocalDateTime.now(), sender, receiver);
+        Message message =
+                new Message(null, simpleMessage.text(), LocalDateTime.now(), sender, receiver, MessageStatus.SENT);
 
         return messageRepository.save(message);
     }
@@ -58,5 +71,27 @@ public class MessageService {
                 .orElseThrow(() -> new UserNotFoundException("Пользователь '" + secondUsername + "' не найден"));
 
         messageRepository.removeChat(first.getId(), second.getId());
+    }
+
+    public int getUnreadMessageCount(String firstUsername, String secondUsername) {
+        User first = userRepository
+                .findByUsername(firstUsername)
+                .orElseThrow(() -> new UserNotFoundException("Пользователь '" + firstUsername + "' не найден"));
+        User second = userRepository
+                .findByUsername(secondUsername)
+                .orElseThrow(() -> new UserNotFoundException("Пользователь '" + secondUsername + "' не найден"));
+
+        return messageRepository.getUnreadMessageCount(first.getId(), second.getId());
+    }
+
+    public void markAllMessagesAsRead(String firstUsername, String secondUsername) {
+        User first = userRepository
+                .findByUsername(firstUsername)
+                .orElseThrow(() -> new UserNotFoundException("Пользователь '" + firstUsername + "' не найден"));
+        User second = userRepository
+                .findByUsername(secondUsername)
+                .orElseThrow(() -> new UserNotFoundException("Пользователь '" + secondUsername + "' не найден"));
+
+        messageRepository.markAllMessagesAsReadByReceiverAndSender(first.getId(), second.getId());
     }
 }

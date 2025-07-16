@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static salex.messenger.entity.MessageStatus.SENT;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -64,8 +65,8 @@ class ChatRestControllerTest {
     public void getChatHistory_WhenCorrectRequest_ThenReturnOkResponse() throws Exception {
         User firstUser = new User(1L, "user", "12345", "name", "surname", "", "");
         User secondUser = new User(2L, "contact", "12345", "name", "surname", "", "");
-        Message msg1 = new Message(1L, "hello", LocalDateTime.now(), firstUser, secondUser);
-        Message msg2 = new Message(2L, "how are you?", LocalDateTime.now(), secondUser, firstUser);
+        Message msg1 = new Message(1L, "hello", LocalDateTime.now(), firstUser, secondUser, SENT);
+        Message msg2 = new Message(2L, "how are you?", LocalDateTime.now(), secondUser, firstUser, SENT);
         List<Message> expectedHistory = List.of(msg1, msg2);
         List<MessageInfo> expectedConvertedHistory = List.of(
                 new MessageInfo(

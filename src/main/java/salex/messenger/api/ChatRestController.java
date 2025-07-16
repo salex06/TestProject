@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import salex.messenger.dto.chat.messages.ChatHistoryResponse;
 import salex.messenger.dto.chat.messages.MessageInfo;
+import salex.messenger.dto.chat.messages.UnreadMessageCountResponse;
 import salex.messenger.dto.chat.user.ChatPartnerInfo;
 import salex.messenger.dto.chat.user.ChatPartnersResponse;
 import salex.messenger.entity.Message;
@@ -35,6 +36,30 @@ public class ChatRestController {
                 new ChatHistoryResponse(
                         history.stream().map(this::convertToMessageInfo).toList(), history.size()),
                 HttpStatus.OK);
+    }
+
+    @GetMapping("/history/unread/count")
+    public ResponseEntity<?> getUnreadMessageCount(
+            @RequestParam("username") String chatPartnerUsername, Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        int count = messageService.getUnreadMessageCount(principal.getName(), chatPartnerUsername);
+
+        return new ResponseEntity<>(new UnreadMessageCountResponse(count), HttpStatus.OK);
+    }
+
+    @PatchMapping("/history/mark/read")
+    public ResponseEntity<?> markAllMessagesAsRead(
+            @RequestParam("username") String chatPartnerUsername, Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        messageService.markAllMessagesAsRead(principal.getName(), chatPartnerUsername);
+
+        return ResponseEntity.ok("");
     }
 
     @GetMapping("/list")

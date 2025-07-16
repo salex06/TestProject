@@ -12,5 +12,6 @@
     <include relativeToChangelogFile="true" file="02-create-index-on-username.sql"/>
     <include relativeToChangelogFile="true" file="03-create-message-table.sql"/>
     <include relativeToChangelogFile="true" file="04-create-contacts-table.sql"/>
+    <include relativeToChangelogFile="true" file="05-add-message-status-column.sql"/>
 
 </databaseChangeLog>

@@ -38,4 +38,8 @@ public class Message {
     @JoinColumn(name = "receiver_id", referencedColumnName = "id")
     @NotNull
     private User receiver;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private MessageStatus status;
 }

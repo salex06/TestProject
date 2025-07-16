@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             data.createdAt = createdAt.getHours() + ":" + createdAt.getMinutes();
             if(selectedUser == data.senderUsername){
                 addMessageToChat(data);
+                readAllMessages(data.senderUsername);
             }else{
                 addUnreadMessage(data);
             }
@@ -61,15 +62,28 @@ document.addEventListener('DOMContentLoaded', async () => {
             if(photoResp.ok){
                 photoPath = await photoResp.text();
             }
+            let unreadMessageCount = (await getUnreadMessageCount(receiverUsername)).count;
             chatInfo = {
                 username : receiverUsername,
-                photoPath : photoPath
+                photoPath : photoPath,
+                unreadMessageCount : unreadMessageCount
             };
             appendChat(chatInfo);
             document.querySelector(`[data-username="${receiverUsername}"]`).click();
         }
     }
 });
+
+async function readAllMessages(senderUsername){
+    const response = await fetch(`/api/chat/history/mark/read?username=${senderUsername}`, {
+        method : "PATCH",
+        credentials: "include",
+    });
+
+    if(response.status == 401){
+        redirectToLogin();
+    }
+}
 
 function sendMessage(e){
     const text = messageInput.value;
@@ -116,11 +130,15 @@ async function loadChats(username){
         let username = chat.username;
         let photoPath = chat.photoPath;
 
+        let unreadMessageCount = (await getUnreadMessageCount(username)).count;
+
         let chatInfo = {
             username : username,
-            photoPath : photoPath
+            photoPath : photoPath,
+            unreadMessageCount: unreadMessageCount
         };
         appendChat(chatInfo);
+
     }
 }
 
@@ -136,7 +154,34 @@ function appendChat(chatInfo){
             <div class="unread-messages-counter hidden" data-value=0>0</div>
         </div>`;
 
-    return chatContainer.querySelector(`.chat-item[data-username='${chatInfo.username}']`);
+    let chatItem =  chatContainer.querySelector(`.chat-item[data-username='${chatInfo.username}']`);
+    updateMsgCounterByNewValue(chatItem, chatInfo.unreadMessageCount);
+    return chatItem;
+}
+
+async function getUnreadMessageCount(username){
+    try{
+        const response = await fetch(`/api/chat/history/unread/count?username=${username}`, {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                "Accept" : "application/json"
+            }
+        });
+        if(response.status == 401){
+            redirectToLogin();
+        }
+
+        if(!response.ok){
+            throw new Error(response);
+        }
+
+        const data = await response.json();
+        console.log(data.count + " " + username);
+        return data;
+    }catch(error){
+        console.log(error);
+    }
 }
 
 function addMessageToChat(message){
@@ -169,9 +214,11 @@ async function addUnreadMessage(data){
     let chatItem = chatContainer.querySelector(`[data-username=${senderUsername}]`);
     if(!chatItem){
         let chatInfo = await getChatPartnerInfo(senderUsername);
+        chatInfo.unreadMessageCount = (await getUnreadMessageCount(senderUsername)).count;
         chatItem = appendChat(chatInfo);
+    }else{
+        updateMsgCounter(chatItem);
     }
-    updateMsgCounter(chatItem);
 }
 
 function updateMsgCounter(chatItem){
@@ -185,6 +232,19 @@ function updateMsgCounter(chatItem){
         unreadMessageCounter.innerHTML = val;
     }
     unreadMessageCounter.dataset.value = val;
+}
+
+function updateMsgCounterByNewValue(chatItem, newValue){
+    if(newValue == 0) return;
+
+    let unreadMessageCounter = chatItem.querySelector('.unread-messages-counter');
+    unreadMessageCounter.classList.remove('hidden');
+    if(newValue > 99){
+        unreadMessageCounter.innerHTML = '+99';
+    }else{
+        unreadMessageCounter.innerHTML = newValue;
+    }
+    unreadMessageCounter.dataset.value = newValue;
 }
 
 async function getChatPartnerInfo(username){

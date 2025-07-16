@@ -3,6 +3,7 @@ package salex.messenger.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static salex.messenger.entity.MessageStatus.SENT;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -89,11 +90,16 @@ class MessageServiceTest {
         when(userRepository.findByUsername(firstUsername)).thenReturn(Optional.of(alice));
         when(userRepository.findByUsername(secondUsername)).thenReturn(Optional.of(alex));
         List<Message> expected = List.of(
-                new Message(1L, "hello", LocalDateTime.now(), alice, alex),
-                new Message(2L, "how are you?", LocalDateTime.now(), alex, alice));
+                new Message(1L, "hello", LocalDateTime.now(), alice, alex, SENT),
+                new Message(2L, "how are you?", LocalDateTime.now(), alex, alice, SENT));
         when(messageRepository.getChatHistory(alice.getId(), alex.getId())).thenReturn(expected);
+        when(messageRepository.save(any())).thenAnswer(i -> {
+            return i.getArgument(0);
+        });
 
         List<Message> actual = messageService.getChatHistory(firstUsername, secondUsername);
+
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -134,10 +140,11 @@ class MessageServiceTest {
         User alex = new User(1L, receiverUsername, "123", "", "", "", "");
         when(userRepository.findByUsername(senderUsername)).thenReturn(Optional.of(alice));
         when(userRepository.findByUsername(receiverUsername)).thenReturn(Optional.of(alex));
-        Message expected = new Message(1L, message.text(), LocalDateTime.MIN, alice, alex);
+        Message expected = new Message(1L, message.text(), LocalDateTime.MIN, alice, alex, SENT);
         when(messageRepository.save(any())).thenAnswer(i -> {
             Message message1 = i.getArgument(0);
-            return new Message(1L, message1.getText(), LocalDateTime.MIN, message1.getSender(), message1.getReceiver());
+            return new Message(
+                    1L, message1.getText(), LocalDateTime.MIN, message1.getSender(), message1.getReceiver(), SENT);
         });
 
         Message actual = messageService.saveMessage(senderUsername, receiverUsername, message);
