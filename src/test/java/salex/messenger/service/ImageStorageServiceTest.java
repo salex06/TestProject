@@ -15,23 +15,26 @@ import salex.messenger.config.LocalStorageConfig;
 import salex.messenger.exception.StorageException;
 
 class ImageStorageServiceTest {
-    private ImageStorageService service;
+    private final ImageStorageService service;
 
-    private LocalStorageConfig config;
+    private final LocalStorageConfig config;
 
     public ImageStorageServiceTest() {
-        config = new LocalStorageConfig("src/test/java/salex/messenger/service/images/", DataSize.ofBytes(1));
+        config = new LocalStorageConfig(
+                "src/test/java/salex/messenger/service/images/",
+                "src/test/java/salex/messenger/service/images/",
+                DataSize.ofMegabytes(5));
         service = new ImageStorageService(config);
     }
 
     @Test
     @DisplayName("Файлы сохраняются успешно")
-    public void store_WhenCorrectFile_ThenSaveFile() throws InterruptedException, IOException {
+    public void store_UserPhoto_WhenCorrectFile_ThenSaveFile() throws InterruptedException, IOException {
         String filename = "ex1.png";
         MockMultipartFile file = new MockMultipartFile("ex1", filename, "image/png", "test image content".getBytes());
-        Path pathToFile = Path.of(config.location() + filename);
+        Path pathToFile = Path.of(config.userPhotoLocation() + filename);
 
-        service.store(file, filename);
+        service.store(file, filename, service.getUserPhotoDir());
 
         assertTrue(Files.exists(pathToFile));
 
@@ -42,25 +45,25 @@ class ImageStorageServiceTest {
     @DisplayName("Файлы удаляются успешно")
     public void remove_WhenCorrectFilename_ThenRemoveFile() throws IOException {
         String filename = "ex2.png";
-        Path pathToFile = Path.of(config.location() + filename);
+        Path pathToFile = Path.of(config.userPhotoLocation() + filename);
         Files.createFile(pathToFile);
 
-        service.remove(filename);
+        service.remove(filename, service.getUserPhotoDir());
 
         assertFalse(Files.exists(pathToFile));
     }
 
     @Test
     @DisplayName("Валидация: пустой файл")
-    public void validateImageFile_WhenEmptyFile_ThenThrowException() {
+    public void validateFile_WhenEmptyFile_ThenThrowException() {
         MockMultipartFile file = new MockMultipartFile("ex1", "ex1.png", "image/png", new byte[] {});
 
-        assertThrows(StorageException.class, () -> service.validateImageFile(file));
+        assertThrows(StorageException.class, () -> service.validateFile(file));
     }
 
     @Test
     @DisplayName("Валидация: слишком большой файл")
-    public void validateImageFile_WhenFileTooLarge_ThenThrowException() {
+    public void validateFile_WhenFileTooLarge_ThenThrowException() {
         MockMultipartFile file = new MockMultipartFile(
                 "ex1",
                 "ex1.png",
@@ -69,32 +72,32 @@ class ImageStorageServiceTest {
 
         assertThrows(
                 StorageException.class,
-                () -> service.validateImageFile(file),
+                () -> service.validateFile(file),
                 "Размер файла не должен превышать " + config.maxFileSize() + " Байт");
     }
 
     @Test
     @DisplayName("Валидация: некорректный формат")
-    public void validateImageFile_WhenInvalidFileFormat_ThenThrowException() {
+    public void validateFile_WhenInvalidFileFormat_ThenThrowException() {
         MockMultipartFile file = new MockMultipartFile(
                 "ex1",
                 "ex1.txt",
                 "plain/txt",
                 new byte[(int) config.maxFileSize().toBytes()]);
 
-        assertThrows(StorageException.class, () -> service.validateImageFile(file));
+        assertThrows(StorageException.class, () -> service.validateFile(file));
     }
 
     @Test
     @DisplayName("Валидация: файл корректный")
-    public void validateImageFile_WhenCorrectFile_ThenDoNotThrowAnyException() {
+    public void validateFile_WhenCorrectFile_ThenDoNotThrowAnyException() {
         MockMultipartFile file = new MockMultipartFile(
                 "ex1",
                 "ex1.png",
                 "image/png",
                 new byte[(int) config.maxFileSize().toBytes()]);
 
-        assertDoesNotThrow(() -> service.validateImageFile(file));
+        assertDoesNotThrow(() -> service.validateFile(file));
     }
 
     @Test
@@ -102,7 +105,7 @@ class ImageStorageServiceTest {
     public void loadAsResource_WhenFileDoesNotExist_ThenReturnNull() {
         String filename = "wrongName";
 
-        Resource resource = service.loadAsResource(filename);
+        Resource resource = service.loadAsResource(filename, service.getUserPhotoDir());
 
         assertNull(resource);
     }
@@ -112,11 +115,11 @@ class ImageStorageServiceTest {
     public void loadAsResource_WhenFileExists_ThenReturnResource() throws IOException {
         String filename = "ex1.png";
         MockMultipartFile file = new MockMultipartFile("ex1", filename, "image/png", "test image content".getBytes());
-        Path pathToFile = Path.of(config.location() + filename);
+        Path pathToFile = Path.of(config.userPhotoLocation() + filename);
         Files.createFile(pathToFile);
         file.transferTo(pathToFile);
 
-        Resource resource = service.loadAsResource(filename);
+        Resource resource = service.loadAsResource(filename, service.getUserPhotoDir());
 
         assertEquals(filename, resource.getFilename());
         assertEquals(

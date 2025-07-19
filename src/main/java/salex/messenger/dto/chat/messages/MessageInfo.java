@@ -5,7 +5,8 @@ import jakarta.validation.constraints.PastOrPresent;
 import java.time.LocalDateTime;
 
 public record MessageInfo(
-        @NotBlank String text,
+        String text,
+        String pathToImage,
         @PastOrPresent LocalDateTime createdAt,
         @NotBlank String senderUsername,
         @NotBlank String receiverUsername) {}

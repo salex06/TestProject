@@ -132,8 +132,11 @@
         </div>
 
         <div class="chat-input">
-            <button class="attach-btn">
+            <button class="attach-btn" id="attach-btn">
                 <i class="fas fa-paperclip"></i>
+                <i class="hidden fa fa-times" id="cancel-uploading-image"></i>
+                <input type="file" id="message-media" accept="image/*" class="hidden">
+                <div id="media-filename" class="hidden"></div>
             </button>
             <input id="message-input" type="text" placeholder="Напишите сообщение...">
             <button id="message-btn" class="send-btn">

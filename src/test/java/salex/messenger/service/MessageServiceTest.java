@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import salex.messenger.dto.chat.messages.SimpleMessage;
+import salex.messenger.dto.chat.messages.WebSocketMessage;
 import salex.messenger.entity.Message;
 import salex.messenger.entity.User;
 import salex.messenger.exception.UserNotFoundException;
@@ -90,8 +90,8 @@ class MessageServiceTest {
         when(userRepository.findByUsername(firstUsername)).thenReturn(Optional.of(alice));
         when(userRepository.findByUsername(secondUsername)).thenReturn(Optional.of(alex));
         List<Message> expected = List.of(
-                new Message(1L, "hello", LocalDateTime.now(), alice, alex, SENT),
-                new Message(2L, "how are you?", LocalDateTime.now(), alex, alice, SENT));
+                new Message(1L, "hello", null, LocalDateTime.now(), alice, alex, SENT),
+                new Message(2L, "how are you?", null, LocalDateTime.now(), alex, alice, SENT));
         when(messageRepository.getChatHistory(alice.getId(), alex.getId())).thenReturn(expected);
         when(messageRepository.save(any())).thenAnswer(i -> {
             return i.getArgument(0);
@@ -105,7 +105,7 @@ class MessageServiceTest {
     @Test
     @DisplayName("Неудачная попытка сохранения сообщения: отправитель не найден")
     public void saveMessage_WhenSenderNotFound_ThenThrowException() {
-        SimpleMessage message = new SimpleMessage("text");
+        WebSocketMessage message = new WebSocketMessage("text", null);
         String senderUsername = "alice";
         String receiverUsername = "alex";
         when(userRepository.findByUsername(senderUsername)).thenReturn(Optional.empty());
@@ -118,7 +118,7 @@ class MessageServiceTest {
     @Test
     @DisplayName("Неудачная попытка сохранения сообщения: получатель не найден")
     public void saveMessage_WhenReceiverNotFound_ThenThrowException() {
-        SimpleMessage message = new SimpleMessage("text");
+        WebSocketMessage message = new WebSocketMessage("text", null);
         String senderUsername = "alice";
         User alice = new User(2L, senderUsername, "123", "", "", "", "");
         String receiverUsername = "alex";
@@ -133,18 +133,24 @@ class MessageServiceTest {
     @Test
     @DisplayName("Успешная попытка сохранения сообщения")
     public void saveMessage_WhenCorrectParams_ThenSaveMessage() {
-        SimpleMessage message = new SimpleMessage("text");
+        WebSocketMessage message = new WebSocketMessage("text", null);
         String senderUsername = "alice";
         User alice = new User(2L, senderUsername, "123", "", "", "", "");
         String receiverUsername = "alex";
         User alex = new User(1L, receiverUsername, "123", "", "", "", "");
         when(userRepository.findByUsername(senderUsername)).thenReturn(Optional.of(alice));
         when(userRepository.findByUsername(receiverUsername)).thenReturn(Optional.of(alex));
-        Message expected = new Message(1L, message.text(), LocalDateTime.MIN, alice, alex, SENT);
+        Message expected = new Message(1L, message.text(), null, LocalDateTime.MIN, alice, alex, SENT);
         when(messageRepository.save(any())).thenAnswer(i -> {
             Message message1 = i.getArgument(0);
             return new Message(
-                    1L, message1.getText(), LocalDateTime.MIN, message1.getSender(), message1.getReceiver(), SENT);
+                    1L,
+                    message1.getText(),
+                    null,
+                    LocalDateTime.MIN,
+                    message1.getSender(),
+                    message1.getReceiver(),
+                    SENT);
         });
 
         Message actual = messageService.saveMessage(senderUsername, receiverUsername, message);

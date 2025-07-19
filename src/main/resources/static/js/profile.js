@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function isContact(username){
     try{
-        const response = await fetch(`/api/contacts/check?owner=${await getUsername()}&contact=${username}`, {
+        const response = await fetch(`/api/contacts/check?contact=${username}`, {
             method: "GET",
             credentials: "include",
             headers : {
@@ -50,11 +50,7 @@ async function isContact(username){
         }
 
         const data = await response.text();
-        if(data == "true"){
-            return true;
-        }
-
-        return false;
+        return data == "true";
     }catch (error) {
        console.error('Ошибка:', error.message);
     }
@@ -84,7 +80,7 @@ function updateUserInfo(data) {
 
     const photo = document.getElementById('avatar-preview');
     if(photo)
-        photo.src = `/images/${data.photoPath || 'no_img.jpg'}`;
+        photo.src = `/images/users/${data.photoPath || 'no_img.jpg'}`;
 }
 
 //Обработчик нажатия на кнопку перехода к чату
@@ -95,7 +91,6 @@ document.getElementById("goToChatBtn").addEventListener("click", (e) => {
 //Обработчик добавления пользователя в контакты
 document.getElementById("addToContactBtn").addEventListener("click", async (e) => {
     try{
-        let ownerUsername = await getUsername();
         const response = await fetch("/api/contacts", {
             method: 'POST',
             credentials: "include",
@@ -104,7 +99,6 @@ document.getElementById("addToContactBtn").addEventListener("click", async (e) =
                 "Content-Type" : "application/json"
             },
             body: JSON.stringify({
-                  'owner' : ownerUsername,
                   'contact' : username
             })
         });
@@ -127,7 +121,6 @@ document.getElementById("addToContactBtn").addEventListener("click", async (e) =
 //Обработчик удаления пользователя из контактов
 document.getElementById("removeFromContactsBtn").addEventListener("click", async (e) => {
     try{
-        let ownerUsername = await getUsername();
         const response = await fetch("/api/contacts", {
             method: 'DELETE',
             credentials: "include",
@@ -136,7 +129,6 @@ document.getElementById("removeFromContactsBtn").addEventListener("click", async
                 "Content-Type" : "application/json"
             },
             body: JSON.stringify({
-                  'owner' : ownerUsername,
                   'contact' : username
             })
         });

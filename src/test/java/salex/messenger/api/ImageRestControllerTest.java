@@ -1,5 +1,7 @@
 package salex.messenger.api;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -36,9 +38,9 @@ class ImageRestControllerTest {
     @DisplayName("Файл не найден, вернуть 404")
     public void getImage_WhenFileNotFound_ThenReturn404() throws Exception {
         String filename = "image";
-        when(imageStorageService.loadAsResource(filename)).thenReturn(null);
+        when(imageStorageService.loadAsResource(eq(filename), any())).thenReturn(null);
 
-        mockMvc.perform(get("/api/images/" + filename).content(filename.getBytes()))
+        mockMvc.perform(get("/api/images/users/" + filename).content(filename.getBytes()))
                 .andExpect(status().isNotFound());
     }
 
@@ -46,7 +48,7 @@ class ImageRestControllerTest {
     @DisplayName("Файл не удается прочитать, вернуть 500")
     public void getImage_WhenInvalidFile_ThenReturn500() throws Exception {
         String filename = "image";
-        when(imageStorageService.loadAsResource(filename)).thenAnswer(ans -> {
+        when(imageStorageService.loadAsResource(eq(filename), any())).thenAnswer(ans -> {
             throw new StorageException("Не удалось прочитать файл " + filename);
         });
         String expectedResponse = new ObjectMapper()
@@ -56,7 +58,7 @@ class ImageRestControllerTest {
                         "StorageException",
                         "Не удалось прочитать файл " + filename));
 
-        mockMvc.perform(get("/api/images/" + filename))
+        mockMvc.perform(get("/api/images/users/" + filename))
                 .andExpect(status().isInternalServerError())
                 .andExpect(content().json(expectedResponse));
     }
@@ -68,9 +70,9 @@ class ImageRestControllerTest {
         String filepath = "./src/test/java/salex/messenger/api/test.png";
         Path path = Path.of(filepath);
         Resource resource = new PathResource(path);
-        when(imageStorageService.loadAsResource(filename)).thenReturn(resource);
+        when(imageStorageService.loadAsResource(eq(filename), any())).thenReturn(resource);
 
-        mockMvc.perform(get("/api/images/" + filename))
+        mockMvc.perform(get("/api/images/users/" + filename))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.IMAGE_PNG));
     }

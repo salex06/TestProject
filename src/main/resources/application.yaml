@@ -22,7 +22,8 @@ server:
   port: 8080
 
 storage:
-  location: ./src/main/resources/static/images/
+  user-photo-location: ./src/main/resources/static/images/users/
+  message-media-location: ./src/main/resources/static/images/messages/
   max-file-size: 5MB
 
 jwt:

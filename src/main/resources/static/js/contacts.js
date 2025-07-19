@@ -29,7 +29,7 @@ function appendContact(contact){
         <div class="contact-card">
             <div class="contact-info" data-username=${contact.username}>
                 <div class="contact-avatar">
-                    <img src="/images/${contact.photoPath || 'no_img.jpg'}" alt="Аватар" class="contact-img">
+                    <img src="/images/users/${contact.photoPath || 'no_img.jpg'}" alt="Аватар" class="contact-img">
                 </div>
                 <div class="contact-details">
                     <span class="contact-username">${contact.username}</span>
@@ -74,7 +74,6 @@ contactsContainer.addEventListener('click', (event) => {
 
 async function removeContact(username){
     try{
-        let ownerUsername = await getUsername();
         const response = await fetch("/api/contacts", {
             method: 'DELETE',
             credentials: "include",
@@ -83,7 +82,6 @@ async function removeContact(username){
                 "Content-Type" : "application/json"
             },
             body: JSON.stringify({
-                  'owner' : ownerUsername,
                   'contact' : username
             })
         });

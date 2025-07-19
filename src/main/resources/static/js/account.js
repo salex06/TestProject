@@ -28,7 +28,7 @@ function updateUserInfo(data) {
 
     const photo = document.getElementById('avatar-preview');
     if(photo){
-        photo.src = `/images/${data.photoPath || 'no_img.jpg'}`;
+        photo.src = `/images/users/${data.photoPath || 'no_img.jpg'}`;
 
         let event = new Event("avatarWasChanged", {bubbles: true});
         document.dispatchEvent(event);
@@ -243,7 +243,7 @@ async function uploadAvatar(file) {
             showPopup('Аватар успешно обновлен', 'success');
 
             const data = await response.json();
-            document.getElementById('avatar-preview').src = `/images/${data.updatedPhoto || 'no_img.jpg'}`;
+            document.getElementById('avatar-preview').src = `/images/users/${data.updatedPhoto || 'no_img.jpg'}`;
             let event = new Event("avatarWasChanged", {bubbles: true});
             document.dispatchEvent(event);
         } else {

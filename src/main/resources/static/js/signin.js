@@ -19,7 +19,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             throw new Error(errorData.description);
         }
 
-        window.location.href = `/account`;
+        redirectToAccount();
     } catch (error) {
         showPopup(error.message || 'Не удалось войти', 'error');
     }

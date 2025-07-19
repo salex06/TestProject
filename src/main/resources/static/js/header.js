@@ -18,7 +18,7 @@ async function updateHeaderInfo(){
 
     const headerAvatar = document.getElementById('header-avatar');
     if(headerAvatar){
-        headerAvatar.src = `/images/${data.photoPath || 'no_img.jpg'}`;
+        headerAvatar.src = `/images/users/${data.photoPath || 'no_img.jpg'}`;
     }
 }
 
@@ -93,7 +93,7 @@ async function fetchSuggestions(query) {
         data.content.forEach(user => {
             dropdownList.innerHTML +=
                 `<div class="search-result-item" data-username="${user.username}">
-                    <img src="/images/${user.photoPath || 'no_img.jpg'}" alt="${user.username}">
+                    <img src="/images/users/${user.photoPath || 'no_img.jpg'}" alt="${user.username}">
                     <span class="search-result-item-username">${user.username} </span>
                     <span class="search-result-item-otherInfo">${user.name} ${user.surname}</span>
                 </div>`;

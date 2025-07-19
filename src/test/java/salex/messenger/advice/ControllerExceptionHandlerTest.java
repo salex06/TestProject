@@ -74,7 +74,7 @@ class ControllerExceptionHandlerTest {
     @DisplayName("Переданы некорректные параметры в запросе (не прошли валидацию)")
     public void whenMethodArgumentNotValidException_ThenReturnApiErrorResponse() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
-        SaveContactRequest invalidRequest = new SaveContactRequest("", "");
+        SaveContactRequest invalidRequest = new SaveContactRequest("");
 
         mockMvc.perform(post("/api/contacts")
                         .content(mapper.writeValueAsString(invalidRequest))

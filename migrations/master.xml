@@ -13,5 +13,6 @@
     <include relativeToChangelogFile="true" file="03-create-message-table.sql"/>
     <include relativeToChangelogFile="true" file="04-create-contacts-table.sql"/>
     <include relativeToChangelogFile="true" file="05-add-message-status-column.sql"/>
+    <include relativeToChangelogFile="true" file="06-add-message-image-column.sql"/>
 
 </databaseChangeLog>

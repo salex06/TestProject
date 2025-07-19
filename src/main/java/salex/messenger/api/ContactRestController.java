@@ -46,11 +46,11 @@ public class ContactRestController {
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        if (contactService.existsByUsernames(request.owner(), request.contact())) {
+        if (contactService.existsByUsernames(principal.getName(), request.contact())) {
             return ResponseEntity.badRequest().build();
         }
 
-        contactService.saveContact(request.owner(), request.contact());
+        contactService.saveContact(principal.getName(), request.contact());
 
         return ResponseEntity.ok().build();
     }
@@ -60,11 +60,11 @@ public class ContactRestController {
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        if (!contactService.existsByUsernames(request.owner(), request.contact())) {
+        if (!contactService.existsByUsernames(principal.getName(), request.contact())) {
             return ResponseEntity.badRequest().build();
         }
 
-        contactService.removeContact(request.owner(), request.contact());
+        contactService.removeContact(principal.getName(), request.contact());
 
         return ResponseEntity.ok().build();
     }

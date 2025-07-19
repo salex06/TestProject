@@ -58,7 +58,7 @@ class UserServiceTest {
                 "username", "password", "name", "surname", "about", new MockMultipartFile("image", new byte[] {1, 2, 3
                 }));
         when(userRepository.existsByUsername(request.username())).thenReturn(false);
-        doThrow(StorageException.class).when(imageStorageService).validateImageFile(request.photo());
+        doThrow(StorageException.class).when(imageStorageService).store(eq(request.photo()), any(), any());
 
         assertThrows(StorageException.class, () -> userService.saveUser(request));
     }
@@ -74,7 +74,7 @@ class UserServiceTest {
                 "about",
                 new MockMultipartFile("image", "image", "image/png", new byte[] {1, 2, 3}));
         when(userRepository.existsByUsername(request.username())).thenReturn(false);
-        when(imageStorageService.store(eq(request.photo()), any()))
+        when(imageStorageService.store(eq(request.photo()), any(), any()))
                 .thenReturn(request.photo().getOriginalFilename());
         when(userRepository.save(any(User.class))).thenAnswer(i -> {
             return i.getArgument(0);
@@ -213,7 +213,7 @@ class UserServiceTest {
         user.setPhotoPath("oldPhoto.png");
         MockMultipartFile photo = new MockMultipartFile("name", "photo.png", "image/png", new byte[] {});
         UpdatePhotoRequest request = new UpdatePhotoRequest(photo);
-        when(imageStorageService.store(eq(photo), any())).thenReturn(photo.getOriginalFilename());
+        when(imageStorageService.store(eq(photo), any(), any())).thenReturn(photo.getOriginalFilename());
         when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
         when(userRepository.save(any())).thenAnswer(i -> {
             return i.getArgument(0);
@@ -222,6 +222,6 @@ class UserServiceTest {
         User actual = userService.replacePhoto(username, request);
 
         assertEquals(photo.getOriginalFilename(), actual.getPhotoPath());
-        verify(imageStorageService, times(1)).remove(any());
+        verify(imageStorageService, times(1)).remove(any(), any());
     }
 }

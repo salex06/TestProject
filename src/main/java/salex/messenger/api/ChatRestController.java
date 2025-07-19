@@ -106,6 +106,7 @@ public class ChatRestController {
     private MessageInfo convertToMessageInfo(Message message) {
         return new MessageInfo(
                 message.getText(),
+                message.getPathToMessageImage(),
                 message.getCreatedAt(),
                 message.getSender().getUsername(),
                 message.getReceiver().getUsername());

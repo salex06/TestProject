@@ -65,17 +65,19 @@ class ChatRestControllerTest {
     public void getChatHistory_WhenCorrectRequest_ThenReturnOkResponse() throws Exception {
         User firstUser = new User(1L, "user", "12345", "name", "surname", "", "");
         User secondUser = new User(2L, "contact", "12345", "name", "surname", "", "");
-        Message msg1 = new Message(1L, "hello", LocalDateTime.now(), firstUser, secondUser, SENT);
-        Message msg2 = new Message(2L, "how are you?", LocalDateTime.now(), secondUser, firstUser, SENT);
+        Message msg1 = new Message(1L, "hello", "", LocalDateTime.now(), firstUser, secondUser, SENT);
+        Message msg2 = new Message(2L, "how are you?", "", LocalDateTime.now(), secondUser, firstUser, SENT);
         List<Message> expectedHistory = List.of(msg1, msg2);
         List<MessageInfo> expectedConvertedHistory = List.of(
                 new MessageInfo(
                         msg1.getText(),
+                        msg1.getPathToMessageImage(),
                         msg1.getCreatedAt(),
                         msg1.getSender().getUsername(),
                         msg1.getReceiver().getUsername()),
                 new MessageInfo(
                         msg2.getText(),
+                        msg2.getPathToMessageImage(),
                         msg2.getCreatedAt(),
                         msg2.getSender().getUsername(),
                         msg2.getReceiver().getUsername()));

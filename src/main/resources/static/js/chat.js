@@ -2,7 +2,10 @@ let selectedUser = null;
 const chatMessagesContainer = document.getElementById('chat-messages');
 const sendMessageBtn = document.getElementById('message-btn');
 const messageInput = document.getElementById('message-input');
+const messageMediaInput = document.getElementById('message-media');
+const cancelUploadingBtn = document.getElementById('cancel-uploading-image');
 const chatContainer = document.getElementById('chat-list');
+
 let stompClient;
 let socket;
 let currentUser;
@@ -85,27 +88,67 @@ async function readAllMessages(senderUsername){
     }
 }
 
-function sendMessage(e){
+async function sendMessage(e){
+    if(!selectedUser) return;
+
     const text = messageInput.value;
-    if(!text || !selectedUser)
+    const files = messageMediaInput.files;
+    if(!text && !files[0])
         return;
 
+    let pathToImage;
+    if(files[0]){
+        pathToImage = await uploadFile(files[0]);
+    }
+
+    const wsMessage = {
+        text: text,
+        pathToImage : pathToImage
+    };
     stompClient.publish({
       destination: '/app/chat/' + selectedUser,
-      body: JSON.stringify({text: text}),
-      headers: {credentials: 'include'},
+      body: JSON.stringify(wsMessage),
+      credentials: 'include'
     });
 
     messageInput.value = '';
+    cancelUploadingBtn.click();
 
     date = new Date();
     message = {
         text: text,
         createdAt: date.getHours() + ":" + date.getMinutes(),
         senderUsername: currentUser,
-        receiverUsername: selectedUser
+        receiverUsername: selectedUser,
+        pathToImage : pathToImage
     };
+
     addMessageToChat(message);
+}
+
+async function uploadFile(file){
+    let formData = new FormData();
+    formData.append('image', file);
+
+    try{
+        const response = await fetch('/api/images/messages', {
+            method: 'POST',
+            credentials: 'include',
+            body: formData
+        });
+
+        if(response.status == 401){
+            redirectToLogin();
+        }
+        if(!response.ok){
+            throw new Error(response);
+        }
+
+        return await response.text();
+    }catch(error){
+        console.log(error);
+        return null;
+    }
 }
 
 async function loadChats(username){
@@ -146,7 +189,7 @@ function appendChat(chatInfo){
     chatContainer.innerHTML += `
         <div class="chat-item" data-username = ${chatInfo.username}>
             <div class="chat-avatar">
-               <img src="/images/${chatInfo.photoPath || 'no_img.jpg'}" alt="Аватар">
+               <img src="/images/users/${chatInfo.photoPath || 'no_img.jpg'}" alt="Аватар">
            </div>
             <div class="chat-info">
                <div class="chat-name">${chatInfo.username}</div>
@@ -189,19 +232,23 @@ function addMessageToChat(message){
     let createdAt = message.createdAt;
     let senderUsername = message.senderUsername;
     let receiverUsername = message.receiverUsername;
+    let pathToImage = message.pathToImage != null ? `src=/images/messages/${message.pathToImage}` : "";
     if(senderUsername == selectedUser){
         chatMessagesContainer.innerHTML += `
             <div class="message received">
                 <div class="message-content">
-                    ${text}
+                    <img ${pathToImage} class="message-img">
+                    <span>${text}</span>
                 </div>
+
                 <div class="message-time">${createdAt}</div>
             </div>`;
     }else{
         chatMessagesContainer.innerHTML += `
             <div class="message sent">
                 <div class="message-content">
-                    ${text}
+                    <img ${pathToImage} class="message-img">
+                    <span>${text}</span>
                 </div>
                 <div class="message-time">${createdAt}</div>
             </div>`;
@@ -308,6 +355,8 @@ document.getElementById('chat-list').addEventListener('click', async (event) => 
             <div class="chat-user-info">
                 <div class="chat-user-name">${name}</div>
             </div>`;
+        currentChatUser.dataset.username = name;
+
         document.getElementById('remove-chat').classList.remove('hidden');
 
         chatMessagesContainer.innerHTML = "";
@@ -328,7 +377,14 @@ document.getElementById('chat-list').addEventListener('click', async (event) => 
     }
 });
 
+document.getElementById('current-chat-user').addEventListener("click", (e) => {
+    let item = e.target.closest('.current-chat-user');
+    if(item.dataset.username)
+        redirectToProfile(item.dataset.username);
+})
+
 document.getElementById('close-chat').addEventListener('click', (e) => {
+    document.getElementById('current-chat-user').dataset.username = null;
     if (window.innerWidth <= 768) {
         document.getElementById('chat-sidebar').style.display = 'flex';
         document.getElementById('chat-main').style.display = "none";
@@ -358,4 +414,34 @@ document.getElementById('remove-chat').addEventListener('click', async (e) => {
     }
 
     document.getElementById('close-chat').click();
+});
+
+document.getElementById('attach-btn').querySelector(".fa-paperclip").addEventListener('click', function(e) {
+    e.stopPropagation();
+    if(selectedUser)
+        document.getElementById('message-media').click();
+});
+
+document.getElementById('message-media').addEventListener('change', function(e) {
+    let mediaFilenameBlock = document.getElementById('media-filename');
+    let cancelUploadingIcon = document.getElementById('cancel-uploading-image');
+    mediaFilenameBlock.innerHTML = "";
+    mediaFilenameBlock.classList.add('hidden');
+    cancelUploadingIcon.classList.add('hidden');
+    if (this.files && this.files[0]) {
+        mediaFilenameBlock.classList.remove('hidden');
+        cancelUploadingIcon.classList.remove('hidden');
+        mediaFilenameBlock.innerHTML =
+            this.files[0].name.substring(0, 10) + (this.files[0].name.length > 10 ? "..." : "");
+
+    }
+});
+
+document.getElementById('cancel-uploading-image').addEventListener('click', function(e) {
+    document.getElementById('message-media').value = '';
+    let mediaFilenameBlock = document.getElementById('media-filename');
+    let cancelUploadingIcon = document.getElementById('cancel-uploading-image');
+    mediaFilenameBlock.innerHTML = "";
+    mediaFilenameBlock.classList.add('hidden');
+    cancelUploadingIcon.classList.add('hidden');
 });

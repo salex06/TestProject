@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
+import lombok.Getter;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.core.io.PathResource;
 import org.springframework.core.io.Resource;
@@ -15,17 +16,26 @@ import salex.messenger.exception.StorageException;
 @Service
 public class ImageStorageService {
     private final LocalStorageConfig config;
-    private final Path rootDir;
+
+    @Getter
+    private final Path userPhotoDir;
+
+    @Getter
+    private final Path messageMediaDir;
 
     public ImageStorageService(LocalStorageConfig config) {
         this.config = config;
-        this.rootDir = convertToPath(config.location());
+        this.userPhotoDir = convertToPath(config.userPhotoLocation());
+        this.messageMediaDir = convertToPath(config.messageMediaLocation());
     }
 
-    public String store(MultipartFile image, String filename) {
+    public String store(MultipartFile image, String filename, Path destDir) {
         try {
-            Path dest = rootDir.resolve(filename).normalize().toAbsolutePath();
+            validateFile(image);
 
+            Path dest = destDir.resolve(filename).normalize().toAbsolutePath();
+
+            Files.createDirectories(destDir);
             image.transferTo(dest);
             return filename;
         } catch (IOException e) {
@@ -33,16 +43,16 @@ public class ImageStorageService {
         }
     }
 
-    public void remove(String filename) {
-        Path dest = rootDir.resolve(filename).normalize().toAbsolutePath();
+    public void remove(String filename, Path sourceDir) {
+        Path dir = sourceDir.resolve(filename).normalize().toAbsolutePath();
         try {
-            if (dest.toFile().exists()) Files.delete(dest);
+            if (dir.toFile().exists()) Files.delete(dir);
         } catch (IOException e) {
             throw new StorageException("Не удалось удалить файл " + filename, e);
         }
     }
 
-    public void validateImageFile(MultipartFile file) {
+    public void validateFile(MultipartFile file) {
         if (file.isEmpty()) {
             throw new StorageException("Файл не должен быть пустым");
         }
@@ -51,14 +61,13 @@ public class ImageStorageService {
             throw new StorageException("Размер файла не должен превышать " + config.maxFileSize() + " Байт");
         }
 
-        String contentType = file.getContentType();
-        if (!"image/jpeg".equals(contentType) && !"image/png".equals(contentType)) {
+        if (!"image/jpeg".equals(file.getContentType()) && !"image/png".equals(file.getContentType())) {
             throw new StorageException("Допустимы только JPEG и PNG изображения");
         }
     }
 
-    public Resource loadAsResource(String filename) {
-        Path path = rootDir.resolve(filename);
+    public Resource loadAsResource(String filename, Path sourceDir) {
+        Path path = sourceDir.resolve(filename);
         Resource resource = new PathResource(path);
 
         if (resource.exists() && resource.isReadable()) {
@@ -70,8 +79,8 @@ public class ImageStorageService {
         }
     }
 
-    public static String generateFilename(String username, MultipartFile file) {
-        return username + "-" + UUID.randomUUID() + '.' + FilenameUtils.getExtension(file.getOriginalFilename());
+    public static String generateFilename(String prefix, MultipartFile file) {
+        return prefix + "-" + UUID.randomUUID() + '.' + FilenameUtils.getExtension(file.getOriginalFilename());
     }
 
     private static Path convertToPath(String pathStr) {

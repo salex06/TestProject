@@ -74,7 +74,7 @@ class ContactRestControllerTest {
     @Test
     @DisplayName("Неудачный запрос на сохранение контакта: пользователь не авторизован")
     public void saveContact_WhenUnauthorized_ThenReturn401() throws Exception {
-        SaveContactRequest request = new SaveContactRequest("123", "321");
+        SaveContactRequest request = new SaveContactRequest("123");
         mockMvc.perform(post("/api/contacts")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(request)))
@@ -87,7 +87,7 @@ class ContactRestControllerTest {
     public void saveContact_WhenContactAlreadyExists_ThenReturnBadRequest() throws Exception {
         String username = "user";
         String contactUsername = "321";
-        SaveContactRequest request = new SaveContactRequest(username, contactUsername);
+        SaveContactRequest request = new SaveContactRequest(contactUsername);
         when(contactService.existsByUsernames(username, contactUsername)).thenReturn(true);
 
         mockMvc.perform(post("/api/contacts")
@@ -102,20 +102,20 @@ class ContactRestControllerTest {
     public void saveContact_WhenCorrectRequest_ThenSaveContactAndReturnOk() throws Exception {
         String username = "user";
         String contactUsername = "321";
-        SaveContactRequest request = new SaveContactRequest(username, contactUsername);
+        SaveContactRequest request = new SaveContactRequest(contactUsername);
         when(contactService.existsByUsernames(username, contactUsername)).thenReturn(false);
 
         mockMvc.perform(post("/api/contacts")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
-        verify(contactService, times(1)).saveContact(request.owner(), request.contact());
+        verify(contactService, times(1)).saveContact(username, request.contact());
     }
 
     @Test
     @DisplayName("Неудачный запрос на удаление контакта: пользователь не авторизован")
     public void removeContact_WhenUnauthorized_ThenReturn401() throws Exception {
-        RemoveContactRequest request = new RemoveContactRequest("123", "321");
+        RemoveContactRequest request = new RemoveContactRequest("123");
         mockMvc.perform(delete("/api/contacts")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(request)))
@@ -128,7 +128,7 @@ class ContactRestControllerTest {
     public void removeContact_WhenContactNotFound_ThenReturnBadRequest() throws Exception {
         String username = "user";
         String contactUsername = "321";
-        RemoveContactRequest request = new RemoveContactRequest(username, contactUsername);
+        RemoveContactRequest request = new RemoveContactRequest(contactUsername);
         when(contactService.existsByUsernames(username, contactUsername)).thenReturn(false);
 
         mockMvc.perform(delete("/api/contacts")
@@ -143,14 +143,14 @@ class ContactRestControllerTest {
     public void removeContact_WhenCorrectRequest_ThenRemoveContactAndReturnOk() throws Exception {
         String username = "user";
         String contactUsername = "321";
-        RemoveContactRequest request = new RemoveContactRequest(username, contactUsername);
+        RemoveContactRequest request = new RemoveContactRequest(contactUsername);
         when(contactService.existsByUsernames(username, contactUsername)).thenReturn(true);
 
         mockMvc.perform(delete("/api/contacts")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
-        verify(contactService, times(1)).removeContact(request.owner(), request.contact());
+        verify(contactService, times(1)).removeContact(username, request.contact());
     }
 
     @Test

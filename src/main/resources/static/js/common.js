@@ -11,6 +11,7 @@ function showPopup(message, type) {
     }, 3000);
 }
 
+//TODO: API изменилось - поправить
 async function getImage(filename){
     try {
         const response = await fetch(`/api/images/${filename}`, {

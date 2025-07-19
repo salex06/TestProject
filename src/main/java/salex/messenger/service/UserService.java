@@ -38,14 +38,6 @@ public class UserService {
                     "Пользователь с именем '" + signUpRequest.username() + "' уже существует");
         }
 
-        String filename = null;
-        if (signUpRequest.photo() != null && !signUpRequest.photo().isEmpty()) {
-            imageStorageService.validateImageFile(signUpRequest.photo());
-            filename = imageStorageService.store(
-                    signUpRequest.photo(),
-                    ImageStorageService.generateFilename(signUpRequest.username(), signUpRequest.photo()));
-        }
-
         User user = new User(
                 null,
                 signUpRequest.username(),
@@ -53,7 +45,12 @@ public class UserService {
                 signUpRequest.name(),
                 signUpRequest.surname(),
                 signUpRequest.about(),
-                filename);
+                signUpRequest.photo() == null
+                        ? null
+                        : imageStorageService.store(
+                                signUpRequest.photo(),
+                                ImageStorageService.generateFilename(signUpRequest.username(), signUpRequest.photo()),
+                                imageStorageService.getUserPhotoDir()));
         return userRepository.save(user);
     }
 
@@ -102,13 +99,14 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException("Пользователь '" + username + "' не найден"));
 
         if (user.getPhotoPath() != null) {
-            imageStorageService.remove(user.getPhotoPath());
+            imageStorageService.remove(user.getPhotoPath(), imageStorageService.getUserPhotoDir());
             user.setPhotoPath(null);
         }
 
-        imageStorageService.validateImageFile(request.newPhoto());
         String filepath = imageStorageService.store(
-                request.newPhoto(), ImageStorageService.generateFilename(user.getUsername(), request.newPhoto()));
+                request.newPhoto(),
+                ImageStorageService.generateFilename(user.getUsername(), request.newPhoto()),
+                imageStorageService.getUserPhotoDir());
 
         user.setPhotoPath(filepath);
         return userRepository.save(user);

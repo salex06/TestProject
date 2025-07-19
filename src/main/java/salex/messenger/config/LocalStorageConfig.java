@@ -5,4 +5,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.util.unit.DataSize;
 
 @ConfigurationProperties(prefix = "storage")
-public record LocalStorageConfig(@NotNull String location, @NotNull DataSize maxFileSize) {}
+public record LocalStorageConfig(
+        @NotNull String userPhotoLocation, @NotNull String messageMediaLocation, @NotNull DataSize maxFileSize) {}

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import salex.messenger.dto.chat.messages.SimpleMessage;
+import salex.messenger.dto.chat.messages.WebSocketMessage;
 import salex.messenger.entity.Message;
 import salex.messenger.entity.MessageStatus;
 import salex.messenger.entity.User;
@@ -16,6 +16,7 @@ import salex.messenger.repository.UserRepository;
 @Service
 @RequiredArgsConstructor
 public class MessageService {
+    private final ImageStorageService imageService;
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
 
@@ -48,7 +49,7 @@ public class MessageService {
                 .toList();
     }
 
-    public Message saveMessage(String senderUsername, String receiverUsername, SimpleMessage simpleMessage) {
+    public Message saveMessage(String senderUsername, String receiverUsername, WebSocketMessage webSocketMessage) {
         User sender = userRepository
                 .findByUsername(senderUsername)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь '" + senderUsername + "' не найден"));
@@ -56,8 +57,14 @@ public class MessageService {
                 .findByUsername(receiverUsername)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь '" + receiverUsername + "' не найден"));
 
-        Message message =
-                new Message(null, simpleMessage.text(), LocalDateTime.now(), sender, receiver, MessageStatus.SENT);
+        Message message = new Message(
+                null,
+                webSocketMessage.text(),
+                webSocketMessage.pathToImage(),
+                LocalDateTime.now(),
+                sender,
+                receiver,
+                MessageStatus.SENT);
 
         return messageRepository.save(message);
     }
