@@ -25,7 +25,9 @@ public class UsersRestController {
 
     @GetMapping("/search")
     public ResponseEntity<?> searchUsers(
-            @RequestParam String query, @PageableDefault(size = 5) Pageable pageable, Principal principal) {
+            @RequestParam String query,
+            @PageableDefault(size = 5, sort = "username") Pageable pageable,
+            Principal principal) {
         if (principal == null) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }

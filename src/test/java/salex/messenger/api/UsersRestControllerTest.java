@@ -17,10 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -63,7 +60,7 @@ class UsersRestControllerTest {
         User user1 = new User(1L, "alex1", "12345", "", "", "", "");
         User user2 = new User(2L, "alex2", "12345", "", "", "", "");
         // User user3 = new User(3L, "alex3", "12345", "", "", "", "");
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("username"));
         Page<User> users = new PageImpl<>(List.of(user1, user2), pageable, 3);
         List<UserProfileInfo> converted = List.of(
                 new UserProfileInfo(
